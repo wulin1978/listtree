@@ -1,5 +1,6 @@
 <template>
-  <div class='tree'></div>
+  <div class='tree'>
+  </div>
 </template>
 <script>
 /* eslint-disable spaced-comment */
@@ -11,6 +12,8 @@ export default {
       open: 1,
       /* 目录前是否带图标：ifIcon为true时，每级目录前带有表示展开或关闭的图标，展开或关闭的图标路径可通过样式表里的imgtitleopen或imgtitleclose来设定 */
       ifIcon: true,
+      /* 目录前图标为自定义图标，只有当ifIcon为true时才有效 */
+      customIcon: './arrow_triangle-down.png',
       /* 当某个底级目录（所谓底级目录即其下面没有子目录）被点击时，其祖先目录中的一级目录会被改变样式。如果把数字改为2，则祖先目录中的二级目录会被改变样式 */
       checkedparents: 1,
       /* allellist收集了所有目录父元素div的信息，通过循环allellist可操作任意目录样式 */
@@ -41,14 +44,12 @@ export default {
           /* 目录展开或关闭：当目录样式名称中包含openr表示该目录是展开的，当目录样式名称中包含closer表示该目录是关闭的。反过来当要展开目录时则将目录样式添加openr，并删除closer。当要关闭目录时则将目录样式添加closer，并删除openr。 */
           let openr = ' titleopen'
           let closer = ' titleclose'
-          if (_this.ifIcon === true) {
-            openr = openr + ' imgtitleopen'
-            closer = closer + ' imgtitleclose'
-          }
 
           /* 创建目录 */
           let link
           let par = document.createElement('div')
+          let iconDiv = document.createElement('div')
+          par.appendChild(iconDiv)
           let node = document.createTextNode(x[n].name)
           if (!x[n].childer || x[n].childer.length === 0) {
             link = document.createElement('a')
@@ -58,11 +59,22 @@ export default {
             par.appendChild(node)
           }
 
+          let iconDivClassName = 'iconDiv'
+          /* 当this.ifIcon为true表示目录前要带有图标，则将图标div显示，并且根据customIcon值判断是否使用自定义图标，使用自定义图标则图标div使用className为coutomIconDivOpen或者coutomIconDivClose，不使用自定义图标则图标div使用className为iconDivOpen或者iconDivClose */
+          if (this.ifIcon) {
+            iconDiv.style.display = ''
+            iconDivClassName = this.customIcon === '' ? 'iconDiv' : 'coutomIconDiv'
+          } else { // 否则表示目录前不带有图标则将图标div隐藏
+            iconDiv.style.display = 'none'
+          }
+
           /* 当open等于1时，设定所有目录初始状态都是展开的，当open不等于1时，设定所有目录初始状态都是关闭的，*/
-          switch (_this.open) {
-            case 1: par.className = 'par' + openr
-              break
-            default: par.className = 'par' + closer
+          if (_this.open === 1) {
+            par.className = 'par' + openr
+            iconDiv.className = iconDivClassName + 'Open'
+          } else {
+            par.className = 'par' + closer
+            iconDiv.className = iconDivClassName + 'Close'
           }
 
           /* 为每个目录添加一个' title' + arr.length 样式，即给一级目录添加title1样式，给二级目录添加title2样式，给三级目录添加title3样式……，使得每级目录可以从外观上区别开来*/
@@ -82,6 +94,7 @@ export default {
             child = 1
           } else {
             child = 0
+            iconDiv.style.display = 'none'
           }
 
           /* 当open不等于1时隐藏box，即隐藏子目录，换句话说就是关闭所有目录 */
@@ -91,6 +104,7 @@ export default {
           /* 当open等于3或4时，展开一级目录（arr.length与目录级别一致）*/
           if ((_this.open === 3 || _this.open === 4) && arr.length === 1) {
             par.className = par.className.replace(closer, openr)
+            iconDiv.className = 'iconDivOpen'
             box.style.display = ''
           }
 
@@ -100,6 +114,7 @@ export default {
             if (_this.open === 2 && par.className.indexOf(closer) !== -1) {
               for (let k = 0; k < ellist.length; k++) {
                 ellist[k].par.className = ellist[k].par.className.replace(openr, closer)
+                ellist[k].iconDiv.className = 'iconDivClose'
                 ellist[k].box.style.display = 'none'
               }
             }
@@ -109,8 +124,10 @@ export default {
               box.style.display = box.style.display === 'none' ? '' : 'none'
               if (par.className.indexOf(openr) !== -1) {
                 par.className = par.className.replace(openr, closer)
+                iconDiv.className = 'iconDivClose'
               } else if (par.className.indexOf(closer) !== -1) {
                 par.className = par.className.replace(closer, openr)
+                iconDiv.className = 'iconDivOpen'
               }
             }
 
@@ -155,9 +172,10 @@ export default {
             thearr[kk] = arr[kk]
           }
           let theel = {
-            par: par,
-            box: box,
-            child: child,
+            par,
+            iconDiv,
+            box,
+            child,
             arr: thearr
           }
           ellist.push(theel)
@@ -198,6 +216,10 @@ $indent: 24px;//子目录缩进距离
     cursor: pointer;
     font-size: 15px;
     padding-left: 24px;
+    text-align: left;
+    vertical-align: middle;
+    position: relative;
+    margin-left: 10px;
   }
   .par:hover{
     color: red;
@@ -205,9 +227,56 @@ $indent: 24px;//子目录缩进距离
   .box{
     padding-left: $indent;
   }
-  //titleopen和titleclose分别表示目录展开和闭合时候的样式，imgtitleopen和imgtitleclose分别表示目录展开和闭合时候前面的图标样式
+  // titleopen和titleclose分别表示目录展开和闭合时候的样式，imgtitleopen和imgtitleclose分别表示目录展开和闭合时候前面的图标样式
   .titleopen{
 
+  }
+  .iconDivClose, .iconDivOpen{
+    width:20px;
+    height:10px;
+    display: inline-block;
+    background: green;
+  }
+  .iconDivClose:after{
+    content:' ';
+    position: absolute;
+    border: 5px solid transparent;
+    border-left: 6px solid black;
+    height: 0px;
+    width: 0px;
+    display: inline-block;
+    transform:translateY(-50%);
+    top: 50%;
+  }
+  .iconDivOpen:after{
+    content:' ';
+    position: absolute;
+    border: 4px solid transparent;
+    border-right: 4px solid black;
+    border-bottom: 4px solid black;
+    height: 0px;
+    width: 0px;
+    display: inline-block;
+    transform:translateY(-50%);
+    top: 50%;
+  }
+  .coutomIconDivOpen{
+    position: absolute;
+    width:20px;
+    height:20px;
+    display: inline-block;
+    background: red;
+    transform:translateY(-50%);
+    top: 50%;
+ }
+  .coutomIconDivClose{
+    position: absolute;
+    width:20px;
+    height:20px;
+    display: inline-block;
+    background: blue;
+    transform:translateY(-50%);
+    top: 50%;
   }
   .imgtitleopen{
     background: url('./arrow_triangle-down.png') left center/24px 24px no-repeat padding-box;
@@ -220,7 +289,7 @@ $indent: 24px;//子目录缩进距离
   }
   /* title[X] 表示X级目录的样式，比如：title1是一级目录样式，title2是二级目录样式 */
   .title1{
-    font-size: 20px;
+    font-size: 30px;
     font-weight: 900;
     color: #6B6B6B;
   }
