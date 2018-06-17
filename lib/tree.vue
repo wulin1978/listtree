@@ -9,11 +9,11 @@ export default {
   data () {
     return {
       /* 展开方式：当open为0时所有目录初始状况下全部关闭。当open为1时所有目录初始状况下全部展开。当open为2时所有目录初始状况下全部关闭，并且同时只能展开一个目录。当open为3时初始状态下所有顶级目录展开，其他目录关闭。当open为4时初始状态下所有顶级目录展开，其他目录关闭，并且顶级目录始终保持展开不能被闭合 */
-      open: 1,
+      open: 4,
       /* 目录前是否带图标：ifIcon为true时，每级目录前带有表示展开或关闭的图标，展开或关闭的图标路径可通过样式表里的imgtitleopen或imgtitleclose来设定 */
       ifIcon: true,
       /* 目录前图标为自定义图标，只有当ifIcon为true时才有效 */
-      customIcon: [],
+      customIcon: ['static/images/arrow_triangle-right.png', 'static/images/arrow_triangle-down.png'],
       /* 当某个底级目录（所谓底级目录即其下面没有子目录）被点击时，其祖先目录中的一级目录会被改变样式。如果把数字改为2，则祖先目录中的二级目录会被改变样式 */
       checkedparents: 1,
       /* allellist收集了所有目录父元素div的信息，通过循环allellist可操作任意目录样式 */
@@ -63,7 +63,7 @@ export default {
           /* 当this.ifIcon为true表示目录前要带有图标，则将图标div显示，并且根据customIcon值判断是否使用自定义图标，使用自定义图标则图标div使用className为coutomIconDivOpen或者coutomIconDivClose，不使用自定义图标则图标div使用className为iconDivOpen或者iconDivClose */
           if (this.ifIcon) {
             iconDiv.style.display = ''
-            if (this.customIcon.length === 0) {
+            if (_this.customIcon.length === 0) {
               iconDivClassName = 'iconDiv'
             } else {
               iconDivClassName = 'coutomIconDiv'
@@ -76,9 +76,19 @@ export default {
           if (_this.open === 1) {
             par.className = 'par' + openr
             iconDiv.className = iconDivClassName + 'Open'
+            if (_this.customIcon.length !== 0) {
+              iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
+              iconDiv.style.backgroundRepeat = 'no-repeat'
+              iconDiv.style.backgroundPosition = 'center center'
+            }
           } else {
             par.className = 'par' + closer
             iconDiv.className = iconDivClassName + 'Close'
+            if (_this.customIcon.length !== 0) {
+              iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
+              iconDiv.style.backgroundRepeat = 'no-repeat'
+              iconDiv.style.backgroundPosition = 'center center'
+            }
           }
 
           /* 为每个目录添加一个' title' + arr.length 样式，即给一级目录添加title1样式，给二级目录添加title2样式，给三级目录添加title3样式……，使得每级目录可以从外观上区别开来*/
@@ -109,6 +119,11 @@ export default {
           if ((_this.open === 3 || _this.open === 4) && arr.length === 1) {
             par.className = par.className.replace(closer, openr)
             iconDiv.className = iconDivClassName + 'Open'
+            if (_this.customIcon.length !== 0) {
+              iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
+              iconDiv.style.backgroundRepeat = 'no-repeat'
+              iconDiv.style.backgroundPosition = 'center center'
+            }
             box.style.display = ''
           }
 
@@ -119,6 +134,11 @@ export default {
               for (let k = 0; k < ellist.length; k++) {
                 ellist[k].par.className = ellist[k].par.className.replace(openr, closer)
                 ellist[k].iconDiv.className = iconDivClassName + 'Close'
+                if (_this.customIcon.length !== 0) {
+                  ellist[k].iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
+                  ellist[k].iconDiv.style.backgroundRepeat = 'no-repeat'
+                  ellist[k].iconDiv.style.backgroundPosition = 'center center'
+                }
                 ellist[k].box.style.display = 'none'
               }
             }
@@ -129,9 +149,19 @@ export default {
               if (par.className.indexOf(openr) !== -1) {
                 par.className = par.className.replace(openr, closer)
                 iconDiv.className = iconDivClassName + 'Close'
+                if (_this.customIcon.length !== 0) {
+                  iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
+                  iconDiv.style.backgroundRepeat = 'no-repeat'
+                  iconDiv.style.backgroundPosition = 'center center'
+                }
               } else if (par.className.indexOf(closer) !== -1) {
                 par.className = par.className.replace(closer, openr)
                 iconDiv.className = iconDivClassName + 'Open'
+                if (_this.customIcon.length !== 0) {
+                  iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
+                  iconDiv.style.backgroundRepeat = 'no-repeat'
+                  iconDiv.style.backgroundPosition = 'center center'
+                }
               }
             }
 
@@ -223,7 +253,6 @@ $indent: 24px;//子目录缩进距离
     text-align: left;
     vertical-align: middle;
     position: relative;
-    margin-left: 10px;
   }
   .par:hover{
     color: red;
@@ -263,7 +292,6 @@ $indent: 24px;//子目录缩进距离
     width:20px;
     height:20px;
     display: inline-block;
-    background: red;
     transform:translateY(-50%);
     top: 50%;
     left: 0;
@@ -273,7 +301,6 @@ $indent: 24px;//子目录缩进距离
     width:20px;
     height:20px;
     display: inline-block;
-    background: blue;
     transform:translateY(-50%);
     top: 50%;
     left: 0;
