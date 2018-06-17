@@ -13,7 +13,7 @@ export default {
       /* 目录前是否带图标：ifIcon为true时，每级目录前带有表示展开或关闭的图标，展开或关闭的图标路径可通过样式表里的imgtitleopen或imgtitleclose来设定 */
       ifIcon: true,
       /* 目录前图标为自定义图标，只有当ifIcon为true时才有效 */
-      customIcon: './arrow_triangle-down.png',
+      customIcon: [],
       /* 当某个底级目录（所谓底级目录即其下面没有子目录）被点击时，其祖先目录中的一级目录会被改变样式。如果把数字改为2，则祖先目录中的二级目录会被改变样式 */
       checkedparents: 1,
       /* allellist收集了所有目录父元素div的信息，通过循环allellist可操作任意目录样式 */
@@ -63,7 +63,11 @@ export default {
           /* 当this.ifIcon为true表示目录前要带有图标，则将图标div显示，并且根据customIcon值判断是否使用自定义图标，使用自定义图标则图标div使用className为coutomIconDivOpen或者coutomIconDivClose，不使用自定义图标则图标div使用className为iconDivOpen或者iconDivClose */
           if (this.ifIcon) {
             iconDiv.style.display = ''
-            iconDivClassName = this.customIcon === '' ? 'iconDiv' : 'coutomIconDiv'
+            if (this.customIcon.length === 0) {
+              iconDivClassName = 'iconDiv'
+            } else {
+              iconDivClassName = 'coutomIconDiv'
+            }
           } else { // 否则表示目录前不带有图标则将图标div隐藏
             iconDiv.style.display = 'none'
           }
@@ -104,7 +108,7 @@ export default {
           /* 当open等于3或4时，展开一级目录（arr.length与目录级别一致）*/
           if ((_this.open === 3 || _this.open === 4) && arr.length === 1) {
             par.className = par.className.replace(closer, openr)
-            iconDiv.className = 'iconDivOpen'
+            iconDiv.className = iconDivClassName + 'Open'
             box.style.display = ''
           }
 
@@ -114,7 +118,7 @@ export default {
             if (_this.open === 2 && par.className.indexOf(closer) !== -1) {
               for (let k = 0; k < ellist.length; k++) {
                 ellist[k].par.className = ellist[k].par.className.replace(openr, closer)
-                ellist[k].iconDiv.className = 'iconDivClose'
+                ellist[k].iconDiv.className = iconDivClassName + 'Close'
                 ellist[k].box.style.display = 'none'
               }
             }
@@ -124,10 +128,10 @@ export default {
               box.style.display = box.style.display === 'none' ? '' : 'none'
               if (par.className.indexOf(openr) !== -1) {
                 par.className = par.className.replace(openr, closer)
-                iconDiv.className = 'iconDivClose'
+                iconDiv.className = iconDivClassName + 'Close'
               } else if (par.className.indexOf(closer) !== -1) {
                 par.className = par.className.replace(closer, openr)
-                iconDiv.className = 'iconDivOpen'
+                iconDiv.className = iconDivClassName + 'Open'
               }
             }
 
@@ -231,14 +235,7 @@ $indent: 24px;//子目录缩进距离
   .titleopen{
 
   }
-  .iconDivClose, .iconDivOpen{
-    width:20px;
-    height:10px;
-    display: inline-block;
-    background: green;
-  }
-  .iconDivClose:after{
-    content:' ';
+  .iconDivClose{
     position: absolute;
     border: 5px solid transparent;
     border-left: 6px solid black;
@@ -247,9 +244,9 @@ $indent: 24px;//子目录缩进距离
     display: inline-block;
     transform:translateY(-50%);
     top: 50%;
+    left: 0;
   }
-  .iconDivOpen:after{
-    content:' ';
+  .iconDivOpen{
     position: absolute;
     border: 4px solid transparent;
     border-right: 4px solid black;
@@ -259,6 +256,7 @@ $indent: 24px;//子目录缩进距离
     display: inline-block;
     transform:translateY(-50%);
     top: 50%;
+    left: 0;
   }
   .coutomIconDivOpen{
     position: absolute;
@@ -268,6 +266,7 @@ $indent: 24px;//子目录缩进距离
     background: red;
     transform:translateY(-50%);
     top: 50%;
+    left: 0;
  }
   .coutomIconDivClose{
     position: absolute;
@@ -277,6 +276,7 @@ $indent: 24px;//子目录缩进距离
     background: blue;
     transform:translateY(-50%);
     top: 50%;
+    left: 0;
   }
   .imgtitleopen{
     background: url('./arrow_triangle-down.png') left center/24px 24px no-repeat padding-box;
