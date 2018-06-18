@@ -1,14 +1,19 @@
 <template>
   <div class='oldtree'>
+    <branch :listData="listData"></branch>
   </div>
 </template>
 <script>
+import Branch from './branch'
 /* eslint-disable spaced-comment */
 export default {
+  components: {
+    Branch
+  },
   name: 'mytree',
   props: {
     /* 列表内容，须以 json 格式传输 */
-    list: {
+    listData: {
       default: []
     },
     /* 展开方式：当open为0时所有目录初始状况下全部关闭。当open为1时所有目录初始状况下全部展开。当open为2时所有目录初始状况下全部关闭，并且同时只能展开一个目录。当open为3时初始状态下所有顶级目录展开，其他目录关闭。当open为4时初始状态下所有顶级目录展开，其他目录关闭，并且顶级目录始终保持展开不能被闭合 */
@@ -21,7 +26,9 @@ export default {
     },
     /* 目录前图标为自定义图标，只有当ifIcon为true时才有效。该值为包含2个字符串的数组，第一个字符串表示目录闭合时的图标地址，第二个字符串表示目录展开时的图标的地址。 */
     customIcon: {
-      default: []
+      default: function () {
+        return []
+      }
     },
     /* 当某个底级目录（所谓底级目录即其下面没有子目录）被点击时，其祖先目录中的一级目录会被改变样式。如果把数字改为2，则祖先目录中的二级目录会被改变样式 */
     checkedparents: {
@@ -29,11 +36,13 @@ export default {
     },
     /* allellist收集了所有目录父元素div的信息，通过循环allellist可操作任意目录样式 */
     allellist: {
-      default: []
+      default: function () {
+        return []
+      }
     },
     /* 下级目录相对于上级目录缩进距离 */
     indentIcon: {
-      default: 14
+      default: 24
     },
     /* 目录标题相对于图标缩进的距离 */
     indentLetter: {
@@ -42,11 +51,16 @@ export default {
     /* 目录间距 */
     branchSpace: {
       default: 10
+    },
+    router: {
+      default: function () {
+        return {}
+      }
     }
   },
   methods: {
-    /* mylist函数把从外部读取的数组转化为树形结构，x为代表目录信息的数组，parent为目录的父元素，t为中介参数，用来传递arr的值，arr的值包含了目录在树状结构中所处级别和位置的信息 */
-    mylist (x, parent, t = []) {
+    /* createList 函数把从外部读取的数组转化为树形结构，x为代表目录信息的数组，parent为目录的父元素，t为中介参数，用来传递arr的值，arr的值包含了目录在树状结构中所处级别和位置的信息 */
+    createList (x, parent, t = []) {
       let _this = this
       if (x.length > 0) {
         /* 设定arr的值，使arr的长度和目录在树状结构中所处级别对应，arr内元素的值和目录位置对应。比如arr值为[0,3]时，表示该目录处于第一大类（arr第一个元素值为0）第四个分类（arr第二个元素值为3），目录的级别为第二小分类（arr长度为2）。arr值为[2]时，表示该目录处于第三大类，目录级别为大类。知道目录所处级别就可以为不同级别的目录设定不同的样式 */
@@ -56,7 +70,7 @@ export default {
         for (let k = 0; k < t.length; k++) {
           arr[k] = t[k]
         }
-        /* 每次执行mylist函数的时候都将arr的长度增加1（创建下一级目录时都要执行mylist函数），从而达到使arr.length与目录级别一致的目的*/
+        /* 每次执行 createList 函数的时候都将arr的长度增加1（创建下一级目录时都要执行 createList 函数），从而达到使arr.length与目录级别一致的目的*/
         arr.push(0)
 
         /* ellist收集了所有当前级别目录所在div，当需要改变所有目录样式的时候可以通过循环ellist来设定每个目录的样式 ，allellist则是所有目录所在div的集合，通过循环allellist可获取非本级别的目录*/
@@ -77,6 +91,7 @@ export default {
           if (!x[n].childer || x[n].childer.length === 0) {
             link = document.createElement('a')
             link.appendChild(node)
+            link.setAttribute('href', x[n].router)
             par.appendChild(link)
           } else {
             par.appendChild(node)
@@ -150,6 +165,9 @@ export default {
               iconDiv.style.backgroundPosition = 'center center'
             }
             box.style.display = ''
+            if (_this.open === 4 && arr.length === 1) {
+              iconDiv.style.display = 'none'
+            }
           }
 
           /* ------------------------点击事件--------------------------- */
@@ -192,7 +210,7 @@ export default {
 
             /* 当被点击的目录为底层目录时使得该目录及其中的一个祖先目录成选中状态 */
             if (!x[n].childer || x[n].childer.length === 0) {
-              _this.$router.push('/' + x[n].id)
+              _this.router.push(x[n].router)
               /* 通过循环allellist里的所有元素查找被点击目录的所有祖先目录，然后通过checkedparents值来确定一级祖先目录还是二级祖先目录设定为选中状态 */
               for (let l = 0; l < _this.allellist.length; l++) {
                 if (_this.allellist[l].child === 0) {
@@ -224,8 +242,8 @@ export default {
           /* ----------------------------------------------------------- */
 
           /* 将每个目录所在div信息收集起来，这里arr必须用一个中介（thearr）来转一下，否则后面push的arr值会覆盖前面的arr值 */
-          /* ellist收集的是本级目录信息，因为创建每级目录时都会执行一次mylist，而每次执行mylist都会重新定义ellist，所以每个ellist收集的都是本次执行函数mylist时push给ellist的值 */
-          /* allellist收集的是所有目录的信息，因为allellist是函数mylist外面的数据，每次push给allellist的值都保存在allellist里面 */
+          /* ellist收集的是本级目录信息，因为创建每级目录时都会执行一次createList，而每次执行createList都会重新定义ellist，所以每个ellist收集的都是本次执行函数createList时push给ellist的值 */
+          /* allellist收集的是所有目录的信息，因为allellist是函数createList外面的数据，每次push给allellist的值都保存在allellist里面 */
           let thearr = []
           for (let kk = 0; kk < arr.length; kk++) {
             thearr[kk] = arr[kk]
@@ -240,9 +258,9 @@ export default {
           ellist.push(theel)
           _this.allellist.push(theel)
 
-          /* 如果当前创建的目录还有子目录则再执行函数mylist来创建子目录，*/
+          /* 如果当前创建的目录还有子目录则再执行函数createList来创建子目录，*/
           if (x[n].childer && x[n].childer.length > 0) {
-            _this.mylist(x[n].childer, box, arr)
+            _this.createList(x[n].childer, box, arr)
           } else {
             par.className = 'par title' + arr.length
           }
@@ -255,81 +273,79 @@ export default {
     }
   },
   mounted: function () {
-    this.$options.methods.mylist.bind(this)(this.list, document.getElementsByClassName('oldtree')[0])
+    // this.$options.methods.createList.bind(this)(this.listData, document.getElementsByClassName('oldtree')[0])
   }
 }
 </script>
-<style lang='scss'>
-.oldtree {
-  a {
-    text-decoration: none;
-    color: black;
-  }
-  a:hover {
-    color: red;
-    text-decoration: underline;
-  }
-  .par{
-    cursor: pointer;
-    text-align: left;
-    vertical-align: middle;
-    position: relative;
-  }
-  .par:hover{
-    color: red;
-  }
-  .iconDivClose{
-    position: absolute;
-    border: 5px solid transparent;
-    border-left: 6px solid black;
-    height: 0px;
-    width: 0px;
-    display: inline-block;
-    transform:translateY(-50%);
-    top: 50%;
-    left: 0;
-  }
-  .iconDivOpen{
-    position: absolute;
-    border: 4px solid transparent;
-    border-right: 4px solid black;
-    border-bottom: 4px solid black;
-    height: 0px;
-    width: 0px;
-    display: inline-block;
-    transform:translateY(-50%);
-    top: 50%;
-    left: 0;
-  }
-  .coutomIconDivOpen{
-    position: absolute;
-    width:20px;
-    height:20px;
-    display: inline-block;
-    transform:translateY(-50%);
-    top: 50%;
-    left: 0;
- }
-  .coutomIconDivClose{
-    position: absolute;
-    width:20px;
-    height:20px;
-    display: inline-block;
-    transform:translateY(-50%);
-    top: 50%;
-    left: 0;
-  }
-  .checkedparents{
-    background-color: #117301;
-    color: #fff;
-  }
-  .checkedself{
-    color: #117301;
-    font-weight: bold;
-  }
-  .checkedself:hover{
-    cursor: default;
-    color: #117301;
-  }
+<style>
+a{
+  color: black;
+  text-decoration: none;
+}
+a:hover{
+  color: black;
+  text-decoration: none;
+}
+.par{
+  cursor: pointer;
+  text-align: left;
+  vertical-align: middle;
+  position: relative;
+}
+.par:hover{
+  color: red;
+}
+.iconDivClose{
+  position: absolute;
+  border: 5px solid transparent;
+  border-left: 6px solid black;
+  height: 0px;
+  width: 0px;
+  display: inline-block;
+  transform:translateY(-50%);
+  top: 50%;
+  left: 0;
+}
+.iconDivOpen{
+  position: absolute;
+  border: 4px solid transparent;
+  border-right: 4px solid black;
+  border-bottom: 4px solid black;
+  height: 0px;
+  width: 0px;
+  display: inline-block;
+  transform:translateY(-50%);
+  top: 50%;
+  left: 0;
+}
+.coutomIconDivOpen{
+  position: absolute;
+  width:20px;
+  height:20px;
+  display: inline-block;
+  transform:translateY(-50%);
+  top: 50%;
+  left: 0;
+}
+.coutomIconDivClose{
+  position: absolute;
+  width:20px;
+  height:20px;
+  display: inline-block;
+  transform:translateY(-50%);
+  top: 50%;
+  left: 0;
+}
+.checkedparents{
+  background-color: #117301;
+  color: #fff;
+}
+.checkedself{
+  color: #117301;
+  font-weight: bold;
+}
+.checkedself:hover{
+  cursor: default;
+  color: #117301;
 }
 </style>
