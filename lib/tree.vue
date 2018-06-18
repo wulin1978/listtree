@@ -1,26 +1,49 @@
 <template>
-  <div class='tree'>
+  <div class='oldtree'>
   </div>
 </template>
 <script>
 /* eslint-disable spaced-comment */
 export default {
   name: 'mytree',
-  data () {
-    return {
-      /* 展开方式：当open为0时所有目录初始状况下全部关闭。当open为1时所有目录初始状况下全部展开。当open为2时所有目录初始状况下全部关闭，并且同时只能展开一个目录。当open为3时初始状态下所有顶级目录展开，其他目录关闭。当open为4时初始状态下所有顶级目录展开，其他目录关闭，并且顶级目录始终保持展开不能被闭合 */
-      open: 4,
-      /* 目录前是否带图标：ifIcon为true时，每级目录前带有表示展开或关闭的图标，展开或关闭的图标路径可通过样式表里的imgtitleopen或imgtitleclose来设定 */
-      ifIcon: true,
-      /* 目录前图标为自定义图标，只有当ifIcon为true时才有效 */
-      customIcon: ['static/images/arrow_triangle-right.png', 'static/images/arrow_triangle-down.png'],
-      /* 当某个底级目录（所谓底级目录即其下面没有子目录）被点击时，其祖先目录中的一级目录会被改变样式。如果把数字改为2，则祖先目录中的二级目录会被改变样式 */
-      checkedparents: 1,
-      /* allellist收集了所有目录父元素div的信息，通过循环allellist可操作任意目录样式 */
-      allellist: []
+  props: {
+    /* 列表内容，须以 json 格式传输 */
+    list: {
+      default: []
+    },
+    /* 展开方式：当open为0时所有目录初始状况下全部关闭。当open为1时所有目录初始状况下全部展开。当open为2时所有目录初始状况下全部关闭，并且同时只能展开一个目录。当open为3时初始状态下所有顶级目录展开，其他目录关闭。当open为4时初始状态下所有顶级目录展开，其他目录关闭，并且顶级目录始终保持展开不能被闭合 */
+    open: {
+      default: 1
+    },
+    /* 目录前是否带图标：ifIcon为true时，每级目录前带有表示展开或关闭的图标，展开或关闭的图标路径可通过样式表里的imgtitleopen或imgtitleclose来设定 */
+    ifIcon: {
+      default: true
+    },
+    /* 目录前图标为自定义图标，只有当ifIcon为true时才有效。该值为包含2个字符串的数组，第一个字符串表示目录闭合时的图标地址，第二个字符串表示目录展开时的图标的地址。 */
+    customIcon: {
+      default: []
+    },
+    /* 当某个底级目录（所谓底级目录即其下面没有子目录）被点击时，其祖先目录中的一级目录会被改变样式。如果把数字改为2，则祖先目录中的二级目录会被改变样式 */
+    checkedparents: {
+      default: 1
+    },
+    /* allellist收集了所有目录父元素div的信息，通过循环allellist可操作任意目录样式 */
+    allellist: {
+      default: []
+    },
+    /* 下级目录相对于上级目录缩进距离 */
+    indentIcon: {
+      default: 14
+    },
+    /* 目录标题相对于图标缩进的距离 */
+    indentLetter: {
+      default: 6
+    },
+    /* 目录间距 */
+    branchSpace: {
+      default: 10
     }
   },
-  props: ['list'],
   methods: {
     /* mylist函数把从外部读取的数组转化为树形结构，x为代表目录信息的数组，parent为目录的父元素，t为中介参数，用来传递arr的值，arr的值包含了目录在树状结构中所处级别和位置的信息 */
     mylist (x, parent, t = []) {
@@ -58,6 +81,8 @@ export default {
           } else {
             par.appendChild(node)
           }
+          par.style.paddingLeft = this.indentLetter + 10 + 'px'
+          par.style.marginBottom = this.branchSpace + 'px'
 
           let iconDivClassName = 'iconDiv'
           /* 当this.ifIcon为true表示目录前要带有图标，则将图标div显示，并且根据customIcon值判断是否使用自定义图标，使用自定义图标则图标div使用className为coutomIconDivOpen或者coutomIconDivClose，不使用自定义图标则图标div使用className为iconDivOpen或者iconDivClose */
@@ -72,35 +97,35 @@ export default {
             iconDiv.style.display = 'none'
           }
 
-          /* 当open等于1时，设定所有目录初始状态都是展开的，当open不等于1时，设定所有目录初始状态都是关闭的，*/
+          /* 当open等于1时，设定所有目录初始状态都是展开的 */
           if (_this.open === 1) {
             par.className = 'par' + openr
             iconDiv.className = iconDivClassName + 'Open'
-            if (_this.customIcon.length !== 0) {
-              iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
-              iconDiv.style.backgroundRepeat = 'no-repeat'
-              iconDiv.style.backgroundPosition = 'center center'
-            }
-          } else {
-            par.className = 'par' + closer
-            iconDiv.className = iconDivClassName + 'Close'
             if (_this.customIcon.length !== 0) {
               iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
               iconDiv.style.backgroundRepeat = 'no-repeat'
               iconDiv.style.backgroundPosition = 'center center'
             }
+          } else { // 当open不等于1时，设定所有目录初始状态都是关闭的
+            par.className = 'par' + closer
+            iconDiv.className = iconDivClassName + 'Close'
+            if (_this.customIcon.length !== 0) {
+              iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
+              iconDiv.style.backgroundRepeat = 'no-repeat'
+              iconDiv.style.backgroundPosition = 'center center'
+            }
           }
 
-          /* 为每个目录添加一个' title' + arr.length 样式，即给一级目录添加title1样式，给二级目录添加title2样式，给三级目录添加title3样式……，使得每级目录可以从外观上区别开来*/
-          par.className = par.className + ' title' + arr.length
+          /* 为每个目录添加一个' treeBranch' + arr.length 样式，即给一级目录添加 treeBranch1 样式，给二级目录添加 treeBranch2 样式，给三级目录添加 treeBranch3 样式……，使得每级目录可以从外观上区别开来，并且 treeBranch 样式可以在插件外自定义*/
+          par.className = par.className + ' treeBranch' + arr.length
 
           /* 每个目录下都有个box，其所有子目录都在box中 */
           let box = document.createElement('div')
           parent.appendChild(par)
           parent.appendChild(box)
 
-          /* 设定box的样式，通过设定该样式可以改变子目录左边框和父目录左边框的距离 */
-          box.className = 'box'
+          /* 设置子目录左边框相对于父目录左边框的缩进距离 */
+          box.style.paddingLeft = this.indentIcon + 'px'
 
           /* child等于1的时候表示该目录下还有子目录，child等于0时表示该目录为底目录，下面已经没有子目录了。点击底目录可打开新的页面内容，点击非底目录则显示或隐藏下面的子目录 */
           let child
@@ -120,7 +145,7 @@ export default {
             par.className = par.className.replace(closer, openr)
             iconDiv.className = iconDivClassName + 'Open'
             if (_this.customIcon.length !== 0) {
-              iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
+              iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
               iconDiv.style.backgroundRepeat = 'no-repeat'
               iconDiv.style.backgroundPosition = 'center center'
             }
@@ -135,7 +160,7 @@ export default {
                 ellist[k].par.className = ellist[k].par.className.replace(openr, closer)
                 ellist[k].iconDiv.className = iconDivClassName + 'Close'
                 if (_this.customIcon.length !== 0) {
-                  ellist[k].iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
+                  ellist[k].iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
                   ellist[k].iconDiv.style.backgroundRepeat = 'no-repeat'
                   ellist[k].iconDiv.style.backgroundPosition = 'center center'
                 }
@@ -150,7 +175,7 @@ export default {
                 par.className = par.className.replace(openr, closer)
                 iconDiv.className = iconDivClassName + 'Close'
                 if (_this.customIcon.length !== 0) {
-                  iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
+                  iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
                   iconDiv.style.backgroundRepeat = 'no-repeat'
                   iconDiv.style.backgroundPosition = 'center center'
                 }
@@ -158,7 +183,7 @@ export default {
                 par.className = par.className.replace(closer, openr)
                 iconDiv.className = iconDivClassName + 'Open'
                 if (_this.customIcon.length !== 0) {
-                  iconDiv.style.backgroundImage = 'url(' + _this.customIcon[0] + ')'
+                  iconDiv.style.backgroundImage = 'url(' + _this.customIcon[1] + ')'
                   iconDiv.style.backgroundRepeat = 'no-repeat'
                   iconDiv.style.backgroundPosition = 'center center'
                 }
@@ -230,13 +255,12 @@ export default {
     }
   },
   mounted: function () {
-    this.$options.methods.mylist.bind(this)(this.list, document.getElementsByClassName('tree')[0])
+    this.$options.methods.mylist.bind(this)(this.list, document.getElementsByClassName('oldtree')[0])
   }
 }
 </script>
 <style lang='scss'>
-$indent: 24px;//子目录缩进距离
-.tree {
+.oldtree {
   a {
     text-decoration: none;
     color: black;
@@ -246,23 +270,13 @@ $indent: 24px;//子目录缩进距离
     text-decoration: underline;
   }
   .par{
-    margin: 12px 0;
     cursor: pointer;
-    font-size: 15px;
-    padding-left: 24px;
     text-align: left;
     vertical-align: middle;
     position: relative;
   }
   .par:hover{
     color: red;
-  }
-  .box{
-    padding-left: $indent;
-  }
-  // titleopen和titleclose分别表示目录展开和闭合时候的样式，imgtitleopen和imgtitleclose分别表示目录展开和闭合时候前面的图标样式
-  .titleopen{
-
   }
   .iconDivClose{
     position: absolute;
@@ -304,31 +318,6 @@ $indent: 24px;//子目录缩进距离
     transform:translateY(-50%);
     top: 50%;
     left: 0;
-  }
-  .imgtitleopen{
-    background: url('./arrow_triangle-down.png') left center/24px 24px no-repeat padding-box;
-  }
-  .titleclose{
-
-  }
-  .imgtitleclose{
-    background: url('./arrow_triangle-right.png') left center/24px 24px no-repeat padding-box;
-  }
-  /* title[X] 表示X级目录的样式，比如：title1是一级目录样式，title2是二级目录样式 */
-  .title1{
-    font-size: 30px;
-    font-weight: 900;
-    color: #6B6B6B;
-  }
-  .title2{
-    font-size: 13px;
-    font-weight: bold;
-  }
-  @for $i from 3 to 6 {
-    .title#{$i} {
-      font-size: 15px;
-      font-weight: bold;
-    }
   }
   .checkedparents{
     background-color: #117301;
