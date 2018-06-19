@@ -1,6 +1,6 @@
 <template>
   <div class='oldtree'>
-    <branch :listData="listData"></branch>
+    <branch :listData="listData" :indentIcon="indentIcon"></branch>
   </div>
 </template>
 <script>
