@@ -4,7 +4,7 @@
     <!-- ========= branch ===========树形结构中每个目录为一个独立的分支（branch），一级branch的id为X，二级branch的id为：X-X，三级branch的id为：X-X-X，以此类推 -->
     <div :style="branchStyle(branchLevel+(index+1))" @click="clickBranch(branchLevel+(index+1), item.children)" :data-index="branchLevel+(index+1)" class='listTreeBranch' :id="'branch'+(branchLevel+(index+1))" @mouseover="mouseOver(branchLevel+(index+1), item.children)" @mouseout="mouseOut(branchLevel+(index+1), item.children)">
       <div class='branchIconBg' :style="branchIconBgStyle" v-if="item.children&&item.children.length>0">
-        <div :id="'branchIcon'+(branchLevel+(index+1))" :style="branchIconStyle(branchLevel+(index+1))" v-if="nowState['branchIcon'+(branchLevel+(index+1))]==='show'"></div>
+        <div :id="'branchIcon'+(branchLevel+(index+1))" :style="branchIconStyle(branchLevel+(index+1))" v-if="control['branchIcon'+(branchLevel+(index+1))]==='show'"></div>
       </div>
       {{item.name}}
     </div>
@@ -22,25 +22,25 @@ export default {
   name: 'branch',
   data () {
     return {
-      nowState: {}, // -----------------各个branch,icon的展开或闭合状态以及鼠标悬停所在branch
+      control: {}, // -----------------控制各个branch,box,icon的展开或闭合以及鼠标悬停状态
       branchState: 'open',
       rightTriangleStyle: `border: 5.5px solid transparent;
-                         border-left: 6px solid ${this.iconColor};
+                         border-left: 6px solid ${this.iconColor[0]};
                          height: 0px;
                          width: 0px;
                          position: absolute;
                          transform:translateY(-50%);
                          top: 50%;`,
       downTriangleStyle: `border: 5.5px solid transparent;
-                        border-top: 6px solid ${this.iconColor};
+                        border-top: 6px solid ${this.iconColor[0]};
                         height: 0px;
                         width: 0px;
                         position: absolute;
                         transform:translateY(-50%);
                         top: 50%;`,
       rightDownTriangleStyle: `border: 4px solid transparent;
-                             border-bottom: 4px solid ${this.iconColor};
-                             border-right: 4px solid ${this.iconColor};
+                             border-bottom: 4px solid ${this.iconColor[0]};
+                             border-right: 4px solid ${this.iconColor[0]};
                              height: 0px;
                              width: 0px;
                              position: absolute;
@@ -52,9 +52,6 @@ export default {
     Branch
   },
   props: {
-    open: {// -------------------------------设置初始状态下各分支展开或闭合情况
-      default: 4
-    },
     branchLevel: { // ---------分支级别，顶级分支为x，二级分支为x-x，三级分支为x-x-x，以此类推
       default: 0
     },
@@ -66,11 +63,14 @@ export default {
         return []
       }
     },
+    open: {// -------------------------------设置初始状态下各分支展开或闭合情况
+      default: 2
+    },
     indent: { // -----子级分支相对父级分支的缩进距离
       default: 24
     },
     spacing: { // -----目录文字与图标间的距离
-      default: 10
+      default: 20
     },
     left: { // ---列表树与左边框之间的距离
       default: 8
@@ -81,85 +81,69 @@ export default {
     cursor: { // -----鼠标移到branch上时指针的样式
       default: 'pointer'
     },
-    iconColor: { // -----branch前图标三角形的颜色
-      default: '#222'
+    iconColor: { // -----branch前图标三角形的颜色，数组第一个元素为图标默认颜色（必须），第二个元素为鼠标经过时的颜色（可省略）
+      default: function () {
+        return ['#222', '#fff']
+      }
     },
     customIcon: { // -----自定义branch前的小图标，customIcon为一个数组，数组第一个元素为展开时图标的位置，第一个元素为闭合时图标的位置
       default: function () {
         return []
       }
     },
-    mouseOverStyle: {
+    mouseOverStyle: { // -------鼠标经过时的样式（branchStyle为鼠标经过时branch的样式，iconStyle为鼠标经过时图标的样式，如果是默认图标，在this.iconColor设置图标的颜色）
       default: function () {
         return {
           branchStyle: {
             color: 'white',
-            background: 'rgb(174, 180, 194)'
+            background: 'green'
           },
-          iconColor: 'white'
+          iconStyle: {
+            opacity: 0.2
+          }
         }
       }
     }
   },
   methods: {
     clickBranch (id) { // -----------------------------branch 点击事件
-      this.nowState['branch' + id][0] = this.nowState['branch' + id][0] === 'open' ? 'close' : 'open'
-      this.nowState['branch' + id][2] = 1
-      this.renewStyle(id)
-      // if ((this.open === 4 && (id + '').length === 1) || !children || children.length === 0) return
-      // let box = document.getElementById('branchBox' + id)
-      // let icon = document.getElementById('branchIcon' + id)
-      // let branch = document.getElementById('branch' + id)
-      // if (!icon) return
-      // if (box.style.display === 'none') {
-      //   box.style.display = ''
-      //   icon.style = this.iconOpenStyle
-      //   branch.style = `${this.branchOpenStyle}
-      //                   cursor: ${this.cursor}`
-      // } else {
-      //   box.style.display = 'none'
-      //   icon.style = this.iconCloseStyle
-      //   branch.style = `${this.branchCloseStyle}
-      //                   cursor: ${this.cursor}`
-      // }
+      if (this.open === 2) { // -------open为2是通过循环将所有同级别的branch都关闭
+        let n = 1
+        let el
+        do {
+          if ((this.branchLevel + n) !== id) {
+            this.control['branch' + (this.branchLevel + n)][0] = 'close'
+            this.renewStyle(this.branchLevel + n) // -------------------------这里renewStyle刷新的是所有同级的分支样式，函数结尾的renewStyle刷新的只是被点击的分支的style
+          }
+          n++
+          el = document.getElementById('branch' + (this.branchLevel + n))
+        } while (el)
+      }
 
-      // if (this.open === 2) { // -----open为2 时同级分支只能展开一个分支，所以这里用循环把所有和当前点击分支的所有同级分支都关闭-----------
-      //   let str = ''
-      //   if (id.length > 1) {
-      //     str = id.split('')
-      //     str.pop()
-      //     str = str.join('')
-      //   }
-      //   let n = 1
-      //   while (document.getElementById('branchBox' + str + n)) {
-      //     let bBox = document.getElementById('branchBox' + str + n)
-      //     let bIcon = document.getElementById('branchIcon' + str + n)
-      //     if (str + n !== '' + id) { // -----------判断循环到的分支和当前点击的分支不是同一个分支才关闭，否则会出现点击不能展开分支的情况。当点击一级目录分支时，id为纯数字，(str + n) 为 (''+数字)，是一个字符串，所以这里要在id前加空字符串，使等式两边数据类型一致
-      //       if (bBox) bBox.style.display = 'none'
-      //       if (bIcon) bIcon.style = this.iconCloseStyle
-      //     }
-      //     n++
-      //   }
-      // }// -------------------------------------------------------------------------------------------------------------------------
+      this.control['branch' + id][0] = this.control['branch' + id][0] === 'open' ? 'close' : 'open'
+
+      if (this.depth === 0 && this.open === 4) this.control['branch' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
+
+      this.control['branch' + id][2] = 1 // -----当点击某一个分支时，鼠标肯定是悬停在该分支上的
+      this.renewStyle(id)
     },
     branchStyle (id) { // --------branch的样式
       let branchStyle = ''
-      // console.log(id + '///' + this.nowState['branch' + (this.branchLevel + id)])
-      let cursor = this.nowState['branch' + id][1]
-      if (this.nowState['branch' + id][0] === 'open') {
+      let cursor = this.control['branch' + id][1]
+      if (this.control['branch' + id][0] === 'open') {
         branchStyle = this.branchOpenStyle
       } else {
         branchStyle = this.branchCloseStyle
       }
-      if (this.nowState['branch' + id][2] === 1) {
-        branchStyle += this.branchMouseOverStyle
+      if (this.control['branch' + id][2] === 1) {
+        branchStyle += this.mouseOverBranchStyle
       }
       return `${branchStyle}
               cursor: ${cursor};`
     },
     branchBoxStyle (id) { // -------box的样式
       let theDisplay
-      if (this.nowState['branch' + id][0] === 'open') {
+      if (this.control['branch' + id][0] === 'open') {
         theDisplay = ''
       } else {
         theDisplay = 'none'
@@ -169,15 +153,19 @@ export default {
     },
     branchIconStyle (id) { // -------图标的样式
       let iconStyle
-      if (this.nowState['branch' + id][0] === 'open') {
+      if (this.control['branch' + id][0] === 'open') {
         iconStyle = this.iconOpenStyle
       } else {
         iconStyle = this.iconCloseStyle
       }
+      if (this.control['branch' + id][2] === 1) {
+        iconStyle = iconStyle.replace(new RegExp(this.iconColor[0], 'gim'), this.iconColor[1])
+        iconStyle += this.mouseOverIconStyle
+        console.log(this.mouseOverIconStyle)
+      }
       return iconStyle
     },
     renewStyle (id) { // --------刷新branch,box和icon的样式（点击或者鼠标移进移出的时候）
-      console.log(id)
       let theBranchId = document.getElementById('branch' + id)
       let theIconId = document.getElementById('branchIcon' + id)
       let theBoxId = document.getElementById('branchBox' + id)
@@ -186,12 +174,12 @@ export default {
       if (theIconId) theIconId.style = this.branchIconStyle(id)
       if (theBoxId) theBoxId.style = this.branchBoxStyle(id)
     },
-    mouseOver (id) { // ----------------鼠标移到branch上时修改this.nowState
-      this.nowState['branch' + id][2] = 1
+    mouseOver (id) { // ----------------鼠标移到branch上时修改this.control
+      this.control['branch' + id][2] = 1
       this.renewStyle(id)
     },
-    mouseOut (id) { // ----------------鼠标移出branch上时修改this.nowState
-      this.nowState['branch' + id][2] = 0
+    mouseOut (id) { // ----------------鼠标移出branch上时修改this.control
+      this.control['branch' + id][2] = 0
       this.renewStyle(id)
     }
   },
@@ -234,34 +222,39 @@ export default {
     },
     boxStyle () {
       return ''
-      // return `padding-left: ${this.indent}px;`
     },
-    branchMouseOverStyle () { // ----鼠标移到branch上时的样式
+    mouseOverBranchStyle () { // ----鼠标移到branch上时的样式
       let overStyle = ''
       for (let key in this.mouseOverStyle.branchStyle) {
         overStyle += key + ':' + this.mouseOverStyle.branchStyle[key] + ';'
+      }
+      return overStyle
+    },
+    mouseOverIconStyle () { // ----鼠标移到branch上时icon的样式
+      let overStyle = ''
+      for (let key in this.mouseOverStyle.iconStyle) {
+        overStyle += key + ':' + this.mouseOverStyle.iconStyle[key] + ';'
       }
       return overStyle
     }
   },
   created () {
     for (let n = 1; n < this.listData.length + 1; n++) {
-      this.$set(this.nowState, 'branch' + (this.branchLevel + n), ['close', this.cursor, 0]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式，第三个元素表示鼠标此时是否悬停在该branch上[0为否，1为是])
-      this.$set(this.nowState, 'branchIcon' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
+      this.$set(this.control, 'branch' + (this.branchLevel + n), ['close', this.cursor, 0]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式，第三个元素表示鼠标此时是否悬停在该branch上[0为否，1为是])
+      this.$set(this.control, 'branchIcon' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
 
       if (this.open === 1) {
-        this.nowState['branch' + (this.branchLevel + n)][0] = 'open' // ----------当open值为1时，所有branch都为展开状态
+        this.control['branch' + (this.branchLevel + n)][0] = 'open' // ----------当open值为1时，所有branch都为展开状态
       } else if ((this.open === 3 || this.open === 4) && this.depth === 0) {
-        this.nowState['branch' + n][0] = 'open' // ----------当open值为3或4时，所有一级branch都为展开状态
+        this.control['branch' + n][0] = 'open' // ----------当open值为3或4时，所有一级branch都为展开状态
       } else if (this.open === 2 && (this.branchLevel + n) === 1) {
-        this.nowState['branch1'][0] = 'open' // ----------当open值为2时，只有第一个一级branch为展开状态
+        this.control['branch1'][0] = 'open' // ----------当open值为2时，只有第一个一级branch为展开状态
       }
       if ((this.open === 4 && this.depth === 0) || !this.listData[n - 1].children || this.listData[n - 1].children.length === 0) {
-        this.nowState['branchIcon' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
-        this.nowState['branch' + (this.branchLevel + n)][1] = '' // -----branch上鼠标样式不能被更改（即保留它默认的样式）
+        this.control['branchIcon' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
+        this.control['branch' + (this.branchLevel + n)][1] = '' // -----branch上鼠标样式不能被更改（即保留它默认的样式）
       }
     }
-    // console.log(this.nowState)
   }
 }
 </script>
