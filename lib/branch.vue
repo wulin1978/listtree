@@ -24,28 +24,28 @@ export default {
     return {
       control: {}, // -----------------控制各个branch,box,icon的展开或闭合以及鼠标悬停状态
       branchState: 'open',
-      rightTriangleStyle: `border: 5.5px solid transparent;
-                         border-left: 6px solid ${this.iconColor[0]};
-                         height: 0px;
-                         width: 0px;
-                         position: absolute;
-                         transform:translateY(-50%);
-                         top: 50%;`,
-      downTriangleStyle: `border: 5.5px solid transparent;
-                        border-top: 6px solid ${this.iconColor[0]};
-                        height: 0px;
-                        width: 0px;
-                        position: absolute;
-                        transform:translateY(-50%);
-                        top: 50%;`,
-      rightDownTriangleStyle: `border: 4px solid transparent;
-                             border-bottom: 4px solid ${this.iconColor[0]};
-                             border-right: 4px solid ${this.iconColor[0]};
-                             height: 0px;
-                             width: 0px;
-                             position: absolute;
-                             transform:translateY(-50%);
-                             top: 50%;`
+      rightTriangleStyle: `border: .35em solid transparent;
+                           border-left: .45em solid ${this.icon.color[0]};
+                           height: 0px;
+                           width: 0px;
+                           position: absolute;
+                           transform:translateY(-50%);
+                           top: 50%;`,
+      downTriangleStyle: `border: .35em solid transparent;
+                          border-top: .45em solid ${this.icon.color[0]};
+                          height: 0px;
+                          width: 0px;
+                          position: absolute;
+                          transform:translateY(-50%);
+                          top: 50%;`,
+      rightDownTriangleStyle: `border: .25em solid transparent;
+                               border-bottom: .25em solid ${this.icon.color[0]};
+                               border-right: .25em solid ${this.icon.color[0]};
+                               height: 0px;
+                               width: 0px;
+                               position: absolute;
+                               transform:translateY(-50%);
+                               top: 50%;`
     }
   },
   components: {
@@ -64,7 +64,7 @@ export default {
       }
     },
     open: {// -------------------------------设置初始状态下各分支展开或闭合情况
-      default: 2
+      default: 1
     },
     indent: { // -----子级分支相对父级分支的缩进距离
       default: 24
@@ -81,24 +81,26 @@ export default {
     cursor: { // -----鼠标移到branch上时指针的样式
       default: 'pointer'
     },
-    iconColor: { // -----branch前图标三角形的颜色，数组第一个元素为图标默认颜色（必须），第二个元素为鼠标经过时的颜色（可省略）
+    icon: { // -----branch前图标三角形的颜色，数组第一个元素为图标默认颜色（必须），第二个元素为鼠标经过时的颜色（可省略）
       default: function () {
-        return ['#222', '#fff']
+        return {
+          /* source为 default 的时候图标使用默认的三角图标，source为数组的时候，图标为自定义图标，数组第一个元素为展开时图标的位置，第二个元素为闭合时图标的位置。自定义图标须放在static文件夹里 */
+          source: 'default',
+          // source: [require('./arrow_triangle-down.png'), require('./arrow_triangle-right.png')],
+          style: '', // ---------style 对默认图标和自定义图标都有效
+          size: 'small', // ----------size 只对默认图标有效
+          color: ['#222', '#fff'] // ------color 只对默认图标有效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色
+        }
       }
     },
-    customIcon: { // -----自定义branch前的小图标，customIcon为一个数组，数组第一个元素为展开时图标的位置，第一个元素为闭合时图标的位置
-      default: function () {
-        return []
-      }
-    },
-    mouseOverStyle: { // -------鼠标经过时的样式（branchStyle为鼠标经过时branch的样式，iconStyle为鼠标经过时图标的样式，如果是默认图标，在this.iconColor设置图标的颜色）
+    mouseOverStyle: { // -------鼠标经过时的样式（branchStyle为鼠标经过时branch的样式，iconStyle为鼠标经过时图标的样式，如果是默认图标，在this.icon设置图标的各属性）
       default: function () {
         return {
           branchStyle: {
             color: 'white',
             background: 'green'
           },
-          iconStyle: {
+          iconStyle: { // ----iconStyle 对默认图标和自定义图标都有效
             opacity: 0.2
           }
         }
@@ -125,6 +127,14 @@ export default {
       if (this.depth === 0 && this.open === 4) this.control['branch' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
 
       this.control['branch' + id][2] = 1 // -----当点击某一个分支时，鼠标肯定是悬停在该分支上的
+      this.renewStyle(id)
+    },
+    mouseOver (id) { // ----------------鼠标移到branch上时修改this.control
+      this.control['branch' + id][2] = 1
+      this.renewStyle(id)
+    },
+    mouseOut (id) { // ----------------鼠标移出branch上时修改this.control
+      this.control['branch' + id][2] = 0
       this.renewStyle(id)
     },
     branchStyle (id) { // --------branch的样式
@@ -159,9 +169,8 @@ export default {
         iconStyle = this.iconCloseStyle
       }
       if (this.control['branch' + id][2] === 1) {
-        iconStyle = iconStyle.replace(new RegExp(this.iconColor[0], 'gim'), this.iconColor[1])
+        iconStyle = iconStyle.replace(new RegExp(this.icon.color[0], 'gim'), this.icon.color[1])
         iconStyle += this.mouseOverIconStyle
-        console.log(this.mouseOverIconStyle)
       }
       return iconStyle
     },
@@ -170,43 +179,42 @@ export default {
       let theIconId = document.getElementById('branchIcon' + id)
       let theBoxId = document.getElementById('branchBox' + id)
 
-      if (theBranchId) theBranchId.style = this.branchStyle(id)
-      if (theIconId) theIconId.style = this.branchIconStyle(id)
-      if (theBoxId) theBoxId.style = this.branchBoxStyle(id)
-    },
-    mouseOver (id) { // ----------------鼠标移到branch上时修改this.control
-      this.control['branch' + id][2] = 1
-      this.renewStyle(id)
-    },
-    mouseOut (id) { // ----------------鼠标移出branch上时修改this.control
-      this.control['branch' + id][2] = 0
-      this.renewStyle(id)
+      if (theBranchId) theBranchId.style.cssText = this.branchStyle(id)
+      if (theIconId) theIconId.style.cssText = this.branchIconStyle(id)
+      if (theBoxId) theBoxId.style.cssText = this.branchBoxStyle(id)
     }
   },
   computed: {
-    branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置
+    branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置，该图层的font-size可以控制图标尺寸
+      let fontSize = '12px'
       let theLeft = this.indent * this.depth + this.left
-      return 'left: ' + theLeft + 'px'
+      if (this.icon.size === 'large') {
+        fontSize = '20px'
+      } else if (this.icon.size === 'middle') {
+        fontSize = '16px'
+      }
+      return `left: ${theLeft}px;
+              font-size: ${fontSize}`
     },
     iconOpenStyle () { // -----图标展开时的样式
-      if (this.customIcon.length === 2) {
+      if (typeof this.icon.source === 'object') {
         return `position: absolute;
                 top: 0;
                 left: 0;
                 bottom: 0;
                 right: 0;
-                background: url('${this.customIcon[0]}') center no-repeat;`
+                background: url('${this.icon.source[0]}') center no-repeat;`
       }
       return this.rightDownTriangleStyle
     },
     iconCloseStyle () { // -----图标闭合时的样式
-      if (this.customIcon.length === 2) {
+      if (typeof this.icon.source === 'object') {
         return `position: absolute;
                 top: 0;
                 left: 0;
                 bottom: 0;
                 right: 0;
-                background: url('${this.customIcon[1]}') center no-repeat;`
+                background: url('${this.icon.source[1]}') center no-repeat;`
       }
       return this.rightTriangleStyle
     },
