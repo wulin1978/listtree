@@ -1,6 +1,6 @@
 <template>
   <div class='oldtree'>
-    <branch :listData="listData" :indentIcon="indentIcon"></branch>
+    <branch :listData="listData" :indentIcon="indentIcon" :treerouter="treerouter"></branch>
   </div>
 </template>
 <script>
@@ -15,6 +15,11 @@ export default {
     /* 列表内容，须以 json 格式传输 */
     listData: {
       default: []
+    },
+    treerouter: {
+      default: function () {
+        return {}
+      }
     },
     /* 展开方式：当open为0时所有目录初始状况下全部关闭。当open为1时所有目录初始状况下全部展开。当open为2时所有目录初始状况下全部关闭，并且同时只能展开一个目录。当open为3时初始状态下所有顶级目录展开，其他目录关闭。当open为4时初始状态下所有顶级目录展开，其他目录关闭，并且顶级目录始终保持展开不能被闭合 */
     open: {
@@ -273,6 +278,7 @@ export default {
     }
   },
   mounted: function () {
+    console.log()
     // this.$options.methods.createList.bind(this)(this.listData, document.getElementsByClassName('oldtree')[0])
   }
 }

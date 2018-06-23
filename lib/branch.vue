@@ -2,15 +2,17 @@
 <div>
   <div v-for="(item, index) in listData" :key="index">
     <!-- ========= branch ===========树形结构中每个目录为一个独立的分支（branch），一级branch的id为X，二级branch的id为：X-X，三级branch的id为：X-X-X，以此类推 -->
-    <div :style="branchStyle(branchLevel+(index+1))" @click="clickBranch(branchLevel+(index+1), item.children)" :data-index="branchLevel+(index+1)" class='listTreeBranch' :id="'branch'+(branchLevel+(index+1))" @mouseover="mouseOver(branchLevel+(index+1), item.children)" @mouseout="mouseOut(branchLevel+(index+1), item.children)">
-      <div class='branchIconBg' :style="branchIconBgStyle" v-if="item.children&&item.children.length>0">
-        <div :id="'branchIcon'+(branchLevel+(index+1))" :style="branchIconStyle(branchLevel+(index+1))" v-if="control['branchIcon'+(branchLevel+(index+1))]==='show'"></div>
+    <a :href="item.router">
+    <div :style="branchStyle(branchLevel+(index+1))" @click.prevent="clickBranch(branchLevel+(index+1), item.children)" :data-index="branchLevel+(index+1)" :class="['lt-branch','lt-branchlevel_'+(depth+1),{'lt-branchlevel_0':(!item.children||item.children.length===0)}]" :id="'lt-branch_'+(branchLevel+(index+1))" @mouseover="mouseOver(branchLevel+(index+1), item.children)" @mouseout="mouseOut(branchLevel+(index+1), item.children)">
+      <div :id="'lt-branchIconbg_'+(branchLevel+(index+1))" class='lt-branchIconBg' :style="branchIconBgStyle" v-if="item.children&&item.children.length>0">
+        <div :id="'lt-branchIcon_'+(branchLevel+(index+1))" :style="branchIconStyle(branchLevel+(index+1))" v-if="control['lt-branchIcon_'+(branchLevel+(index+1))]==='show'"></div>
       </div>
       {{item.name}}
     </div>
+    </a>
     <!--=============== box ================= 每个branch下都有个box层，branch所有的下级分支都在box内，branch的展开和闭合就可以用box的显示隐藏来实现。另外box与左边框的距离可以实现上下级branch的缩进 -->
     <div :style="branchBoxStyle(branchLevel+(index+1), item.children)" :id="'branchBox'+(branchLevel+(index+1))">
-      <branch :listData="item.children" :indent="indent" v-if="item.children&&item.children.length>0" :branchLevel="branchLevel+(index+1)+'-'" :depth="depth+1"></branch>
+      <branch :listData="item.children" :indent="indent" v-if="item.children&&item.children.length>0" :branchLevel="branchLevel+(index+1)+'-'" :depth="depth+1" :treerouter="treerouter"></branch>
     </div>
   </div>
 </div>
@@ -57,6 +59,11 @@ export default {
     },
     depth: { // ------------分支级别的深度，一级分支深度为0，二级分支深度为1，三级分支深度为2，以此类推
       default: 0
+    },
+    treerouter: {
+      default: function () {
+        return {}
+      }
     },
     listData: { // -----------json格式的数据，每个分支目录有name,router,icon,children四个个字段，name为分支的文字内容（必须有）。router为点击分支时跳转的路由地址,如果不跳转可省略router字段。icon为该分支前的图标地址（包括展开时和闭合时的图标，所以icon是个数组），如果使用默认图标icon字段可以省略。children为该分支的下级分支，如果没有下级分支children字段也可以省略
       default: function () {
@@ -109,51 +116,54 @@ export default {
   },
   methods: {
     clickBranch (id) { // -----------------------------branch 点击事件
-      if (this.open === 2) { // -------open为2是通过循环将所有同级别的branch都关闭
+      this.treerouter.push('/abc')
+      if (this.open === 2) { // -------open为2时通过循环将所有同级别的branch都关闭
         let n = 1
         let el
         do {
           if ((this.branchLevel + n) !== id) {
-            this.control['branch' + (this.branchLevel + n)][0] = 'close'
+            this.control['lt-branch_' + (this.branchLevel + n)][0] = 'close'
             this.renewStyle(this.branchLevel + n) // -------------------------这里renewStyle刷新的是所有同级的分支样式，函数结尾的renewStyle刷新的只是被点击的分支的style
           }
           n++
-          el = document.getElementById('branch' + (this.branchLevel + n))
+          el = document.getElementById('lt-branch_' + (this.branchLevel + n))
         } while (el)
       }
 
-      this.control['branch' + id][0] = this.control['branch' + id][0] === 'open' ? 'close' : 'open'
+      this.control['lt-branch_' + id][0] = this.control['lt-branch_' + id][0] === 'open' ? 'close' : 'open'
 
-      if (this.depth === 0 && this.open === 4) this.control['branch' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
+      if (this.depth === 0 && this.open === 4) this.control['lt-branch_' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
 
-      this.control['branch' + id][2] = 1 // -----当点击某一个分支时，鼠标肯定是悬停在该分支上的
+      this.control['lt-branch_' + id][2] = 1 // -----当点击某一个分支时，鼠标肯定是悬停在该分支上的
       this.renewStyle(id)
     },
     mouseOver (id) { // ----------------鼠标移到branch上时修改this.control
-      this.control['branch' + id][2] = 1
+      this.control['lt-branch_' + id][2] = 1
       this.renewStyle(id)
     },
     mouseOut (id) { // ----------------鼠标移出branch上时修改this.control
-      this.control['branch' + id][2] = 0
+      this.control['lt-branch_' + id][2] = 0
       this.renewStyle(id)
     },
     branchStyle (id) { // --------branch的样式
       let branchStyle = ''
-      let cursor = this.control['branch' + id][1]
-      if (this.control['branch' + id][0] === 'open') {
+      let cursor = this.control['lt-branch_' + id][1]
+      if (this.control['lt-branch_' + id][0] === 'open') {
         branchStyle = this.branchOpenStyle
       } else {
         branchStyle = this.branchCloseStyle
       }
-      if (this.control['branch' + id][2] === 1) {
+      if (this.control['lt-branch_' + id][2] === 1) {
         branchStyle += this.mouseOverBranchStyle
       }
-      return `${branchStyle}
+      return `position: relative;
+              text-align: left;
+              ${branchStyle}
               cursor: ${cursor};`
     },
     branchBoxStyle (id) { // -------box的样式
       let theDisplay
-      if (this.control['branch' + id][0] === 'open') {
+      if (this.control['lt-branch_' + id][0] === 'open') {
         theDisplay = ''
       } else {
         theDisplay = 'none'
@@ -163,20 +173,20 @@ export default {
     },
     branchIconStyle (id) { // -------图标的样式
       let iconStyle
-      if (this.control['branch' + id][0] === 'open') {
+      if (this.control['lt-branch_' + id][0] === 'open') {
         iconStyle = this.iconOpenStyle
       } else {
         iconStyle = this.iconCloseStyle
       }
-      if (this.control['branch' + id][2] === 1) {
+      if (this.control['lt-branch_' + id][2] === 1) {
         iconStyle = iconStyle.replace(new RegExp(this.icon.color[0], 'gim'), this.icon.color[1])
         iconStyle += this.mouseOverIconStyle
       }
       return iconStyle
     },
     renewStyle (id) { // --------刷新branch,box和icon的样式（点击或者鼠标移进移出的时候）
-      let theBranchId = document.getElementById('branch' + id)
-      let theIconId = document.getElementById('branchIcon' + id)
+      let theBranchId = document.getElementById('lt-branch_' + id)
+      let theIconId = document.getElementById('lt-branchIcon_' + id)
       let theBoxId = document.getElementById('branchBox' + id)
 
       if (theBranchId) theBranchId.style.cssText = this.branchStyle(id)
@@ -248,30 +258,30 @@ export default {
   },
   created () {
     for (let n = 1; n < this.listData.length + 1; n++) {
-      this.$set(this.control, 'branch' + (this.branchLevel + n), ['close', this.cursor, 0]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式，第三个元素表示鼠标此时是否悬停在该branch上[0为否，1为是])
-      this.$set(this.control, 'branchIcon' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
+      this.$set(this.control, 'lt-branch_' + (this.branchLevel + n), ['close', this.cursor, 0]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式，第三个元素表示鼠标此时是否悬停在该branch上[0为否，1为是])
+      this.$set(this.control, 'lt-branchIcon_' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
 
       if (this.open === 1) {
-        this.control['branch' + (this.branchLevel + n)][0] = 'open' // ----------当open值为1时，所有branch都为展开状态
+        this.control['lt-branch_' + (this.branchLevel + n)][0] = 'open' // ----------当open值为1时，所有branch都为展开状态
       } else if ((this.open === 3 || this.open === 4) && this.depth === 0) {
-        this.control['branch' + n][0] = 'open' // ----------当open值为3或4时，所有一级branch都为展开状态
+        this.control['lt-branch_' + n][0] = 'open' // ----------当open值为3或4时，所有一级branch都为展开状态
       } else if (this.open === 2 && (this.branchLevel + n) === 1) {
-        this.control['branch1'][0] = 'open' // ----------当open值为2时，只有第一个一级branch为展开状态
+        this.control['lt-branch_1'][0] = 'open' // ----------当open值为2时，只有第一个一级branch为展开状态
       }
       if ((this.open === 4 && this.depth === 0) || !this.listData[n - 1].children || this.listData[n - 1].children.length === 0) {
-        this.control['branchIcon' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
-        this.control['branch' + (this.branchLevel + n)][1] = '' // -----branch上鼠标样式不能被更改（即保留它默认的样式）
+        this.control['lt-branchIcon_' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
+        this.control['lt-branch_' + (this.branchLevel + n)][1] = '' // -----branch上鼠标样式不能被更改（即保留它默认的样式）
       }
     }
   }
 }
 </script>
 <style>
-.listTreeBranch{
+/* .listTreeBranch{
   position: relative;
   text-align: left;
-}
-.branchIconBg{
+} */
+.lt-branchIconBg{
   width: 20px;
   height: 20px;
   position: absolute;
