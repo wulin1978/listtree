@@ -23,12 +23,22 @@
       </div>
     </a>
     <!--=============== box ================= 每个branch下都有个box层，branch所有的下级分支都在box内，branch的展开和闭合就可以用box的显示隐藏来实现。另外box与左边框的距离可以实现上下级branch的缩进 -->
-    <div :style="branchBoxStyle(branchLevel+(index+1), item.children)" :id="'branchBox'+(branchLevel+(index+1))">
-      <branch @getClickBranchIndex="getIndex"
+    <div :style="branchBoxStyle(branchLevel+(index+1), item.children)" :id="'lt-branchBox'+(branchLevel+(index+1))">
+      <branch :listData="item.children"
+              :treerouter="treerouter"
+              :open="open"
+              :indent="indent"
+              :spacing="spacing"
+              :left="left"
+              :branchSpacing="branchSpacing"
+              :cursor="cursor"
+              :icon="icon"
+              :mouseOverStyle="mouseOverStyle"
               :clickBranchIndex="clickBranchIndex"
-              :listData="item.children"
-              :indent="indent" v-if="item.children&&item.children.length>0"
-              :branchLevel="branchLevel+(index+1)+'-'" :depth="depth+1" :treerouter="treerouter"></branch>
+              @getClickBranchIndex="getIndex"
+              :branchLevel="branchLevel+(index+1)+'-'"
+              :depth="depth+1"
+              v-if="item.children&&item.children.length>0"></branch>
     </div>
   </div>
 </div>
@@ -42,7 +52,6 @@ export default {
     return {
       control: {}, // -----------------控制各个branch,box,icon的展开或闭合以及鼠标悬停状态
       mouseOverIndex: 0, // -----鼠标正悬停的branch的index号
-      branchState: 'open',
       triangleColor: this.icon.color[0]
     }
   },
@@ -57,11 +66,12 @@ export default {
       default: 0
     },
     clickBranchIndex: '', // -----------被点击的分支index，由父组件传过来
-    treerouter: {
+    treerouter: { // ------------------------路由信息
       default: function () {
         return {}
       }
     },
+    // -------------------------------------------以上props内容用户不能控制，以下props用户可以设置-------------------------------
     listData: { // -----------json格式的数据，每个分支目录有name,router,icon,children四个个字段，name为分支的文字内容（必须有）。router为点击分支时跳转的路由地址,如果不跳转可省略router字段。icon为该分支前的图标地址（包括展开时和闭合时的图标，所以icon是个数组），如果使用默认图标icon字段可以省略。children为该分支的下级分支，如果没有下级分支children字段也可以省略
       default: function () {
         return []
@@ -203,7 +213,7 @@ export default {
     renewStyle (id) { // --------刷新branch,box和icon的样式（点击或者鼠标移进移出的时候）
       let theBranchId = document.getElementById('lt-branch_' + id)
       let theIconId = document.getElementById('lt-branchIcon_' + id)
-      let theBoxId = document.getElementById('branchBox' + id)
+      let theBoxId = document.getElementById('lt-branchBox' + id)
 
       if (theBranchId) theBranchId.style.cssText = this.branchStyle(id)
       if (theIconId) {

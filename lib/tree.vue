@@ -1,10 +1,17 @@
 <template>
   <div>
     <branch :listData="listData"
+            :treerouter="treerouter"
+            :open="open"
+            :indent="indent"
+            :spacing="spacing"
+            :left="left"
+            :branchSpacing="branchSpacing"
+            :cursor="cursor"
+            :icon="icon"
+            :mouseOverStyle="mouseOverStyle"
             :clickBranchIndex="clickBranchIndex"
-            :indentIcon="indentIcon"
-            @getClickBranchIndex="getIndex"
-            :treerouter="treerouter"></branch>
+            @getClickBranchIndex="getIndex"></branch>
   </div>
 </template>
 <script>
@@ -17,58 +24,58 @@ export default {
   name: 'mytree',
   data () {
     return {
-      clickBranchIndex: '' // -----------被点击的分支index
+      clickBranchIndex: '' // -----------被点击的分支index，当用户点击branch时赋值
     }
   },
   props: {
-    /* 列表内容，须以 json 格式传输 */
-    listData: {
-      default: []
+    listData: { // -----------json格式的数据，每个分支目录有name,router,icon,children四个个字段，name为分支的文字内容（必须有）。router为点击分支时跳转的路由地址,如果不跳转可省略router字段。icon为该分支前的图标地址（包括展开时和闭合时的图标，所以icon是个数组），如果使用默认图标icon字段可以省略。children为该分支的下级分支，如果没有下级分支children字段也可以省略
+      default: function () {
+        return []
+      }
     },
-    treerouter: {
+    treerouter: { // ------------------------路由信息，该信息用户必须传输，否则链接无法跳转
       default: function () {
         return {}
       }
     },
-    /* 展开方式：当open为0时所有目录初始状况下全部关闭。当open为1时所有目录初始状况下全部展开。当open为2时所有目录初始状况下全部关闭，并且同时只能展开一个目录。当open为3时初始状态下所有顶级目录展开，其他目录关闭。当open为4时初始状态下所有顶级目录展开，其他目录关闭，并且顶级目录始终保持展开不能被闭合 */
-    open: {
+    // -------------以上treerouter和listData用户必须传输，以下信息用户可根据自己的需要传输----------------------------
+    open: {// -------------------------------设置初始状态下各分支展开或闭合情况
       default: 1
     },
-    /* 目录前是否带图标：ifIcon为true时，每级目录前带有表示展开或关闭的图标，展开或关闭的图标路径可通过样式表里的imgtitleopen或imgtitleclose来设定 */
-    ifIcon: {
-      default: true
-    },
-    /* 目录前图标为自定义图标，只有当ifIcon为true时才有效。该值为包含2个字符串的数组，第一个字符串表示目录闭合时的图标地址，第二个字符串表示目录展开时的图标的地址。 */
-    customIcon: {
-      default: function () {
-        return []
-      }
-    },
-    /* 当某个底级目录（所谓底级目录即其下面没有子目录）被点击时，其祖先目录中的一级目录会被改变样式。如果把数字改为2，则祖先目录中的二级目录会被改变样式 */
-    checkedparents: {
-      default: 1
-    },
-    /* allellist收集了所有目录父元素div的信息，通过循环allellist可操作任意目录样式 */
-    allellist: {
-      default: function () {
-        return []
-      }
-    },
-    /* 下级目录相对于上级目录缩进距离 */
-    indentIcon: {
+    indent: { // -----子级分支相对父级分支的缩进距离
       default: 24
     },
-    /* 目录标题相对于图标缩进的距离 */
-    indentLetter: {
-      default: 6
+    spacing: { // -----目录文字与图标间的距离
+      default: 18
     },
-    /* 目录间距 */
-    branchSpace: {
-      default: 10
+    left: { // ---列表树与左边框之间的距离
+      default: 8
     },
-    router: {
+    branchSpacing: { // ----垂直方向上分支之间间隔
+      default: 15
+    },
+    cursor: { // -----鼠标移到branch上时指针的样式
+      default: 'pointer'
+    },
+    icon: {
       default: function () {
-        return {}
+        return {
+          /* source为 default 的时候图标使用默认的三角图标，source为数组且数组内元素为图片地址的时候，图标为自定义图片，source为数组且数组内元素为className的时候，图标为第三方库图标。数组第一个元素为展开时图标的位置，第二个元素为闭合时图标的位置。自定义图片须放在static文件夹里 */
+          source: 'default',
+          // source: ['fa fa-folder-open', 'fa fa-folder'],
+          // source: ['../static/arrow_triangle-down.png', '../static/arrow_triangle-right.png'],
+          style: '', // ---------style 对默认图标和自定义图标都有效
+          size: 'middle', // ----------size 只对默认图标有效
+          color: ['#222', '#fff'] // --color 默认图标和第三方图标有效，对自定义图片无效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色（可省略，省略时表示鼠标经过时icon不变色，所以在下面created中要判断这个值是否省略，如果省略需要将this.icon.color[1]的值设置为和this.icon.color[0]一样）
+        }
+      }
+    },
+    mouseOverStyle: { // -------鼠标经过时的样式（branchStyle为鼠标经过时branch的样式，iconStyle为鼠标经过时图标的样式，如果是默认图标，在this.icon设置图标的各属性）
+      default: function () {
+        return {
+          branchStyle: {},
+          iconStyle: {} // ----iconStyle 对默认图标和自定义图标都有效
+        }
       }
     }
   },
