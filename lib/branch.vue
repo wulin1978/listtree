@@ -1,11 +1,23 @@
 <template>
 <div>
   <div v-for="(item, index) in listData" :key="index">
-    <!-- ========= branch ===========树形结构中每个目录为一个独立的分支（branch），一级branch的id为X，二级branch的id为：X-X，三级branch的id为：X-X-X，以此类推 -->
+    <!-- ========= branch ===========树形结构中每个目录为一个独立的分支（branch），一级branch的index为X，二级branch的index为：X-X，三级branch的index为：X-X-X，以此类推 -->
     <a :href="item.router">
-      <div :style="branchStyle(branchLevel+(index+1))" @click.prevent="clickBranch(branchLevel+(index+1), item.children)" :data-index="branchLevel+(index+1)" :class="['lt-branch','lt-branchlevel_'+(depth+1),{'lt-branchlevel_0':(!item.children||item.children.length===0)}]" :id="'lt-branch_'+(branchLevel+(index+1))" @mouseover="mouseOver(branchLevel+(index+1), item.children)" @mouseout="mouseOut(branchLevel+(index+1), item.children)">
-        <div :id="'lt-branchIconbg_'+(branchLevel+(index+1))" class='lt-branchIconBg' :style="branchIconBgStyle" v-if="item.children&&item.children.length>0">
-          <span :id="'lt-branchIcon_'+(branchLevel+(index+1))" :class='branchIconClassName(branchLevel+(index+1))' :style="branchIconStyle(branchLevel+(index+1))" v-if="control['lt-branchIcon_'+(branchLevel+(index+1))]==='show'"></span>
+      <div :id="'lt-branch_'+(branchLevel+(index+1))"
+          :data-index="branchLevel+(index+1)"
+          :class="['lt-branch','lt-branchlevel_'+(depth+1),{'lt-branchlevel_0':(!item.children||item.children.length===0)}]"
+          :style="branchStyle(branchLevel+(index+1))"
+          @click.prevent="clickBranch(branchLevel+(index+1), item.router)"
+          @mouseover="mouseOver(branchLevel+(index+1))"
+          @mouseout="mouseOut(branchLevel+(index+1))">
+        <div :id="'lt-branchIconbg_'+(branchLevel+(index+1))"
+             class='lt-branchIconBg'
+             :style="branchIconBgStyle"
+             v-if="item.children&&item.children.length>0">
+          <span :id="'lt-branchIcon_'+(branchLevel+(index+1))"
+                :class='branchIconClassName(branchLevel+(index+1))'
+                :style="branchIconStyle(branchLevel+(index+1))"
+                v-if="control['lt-branchIcon_'+(branchLevel+(index+1))]==='show'"></span>
         </div>
         {{item.name}}
       </div>
@@ -25,29 +37,9 @@ export default {
   data () {
     return {
       control: {}, // -----------------控制各个branch,box,icon的展开或闭合以及鼠标悬停状态
+      mouseOverIndex: 0, // -----鼠标正悬停的branch的index号
       branchState: 'open',
-      rightTriangleStyle: `border: .35em solid transparent;
-                           border-left: .45em solid ${this.icon.color[0]};
-                           height: 0px;
-                           width: 0px;
-                           position: absolute;
-                           transform:translateY(-50%);
-                           top: 50%;`,
-      downTriangleStyle: `border: .35em solid transparent;
-                          border-top: .45em solid ${this.icon.color[0]};
-                          height: 0px;
-                          width: 0px;
-                          position: absolute;
-                          transform:translateY(-50%);
-                          top: 50%;`,
-      rightDownTriangleStyle: `border: .25em solid transparent;
-                               border-bottom: .25em solid ${this.icon.color[0]};
-                               border-right: .25em solid ${this.icon.color[0]};
-                               height: 0px;
-                               width: 0px;
-                               position: absolute;
-                               transform:translateY(-50%);
-                               top: 50%;`
+      triangleColor: this.icon.color[0]
     }
   },
   components: {
@@ -71,7 +63,7 @@ export default {
       }
     },
     open: {// -------------------------------设置初始状态下各分支展开或闭合情况
-      default: 0
+      default: 1
     },
     indent: { // -----子级分支相对父级分支的缩进距离
       default: 24
@@ -92,12 +84,12 @@ export default {
       default: function () {
         return {
           /* source为 default 的时候图标使用默认的三角图标，source为数组且数组内元素为图片地址的时候，图标为自定义图片，source为数组且数组内元素为className的时候，图标为第三方库图标。数组第一个元素为展开时图标的位置，第二个元素为闭合时图标的位置。自定义图片须放在static文件夹里 */
-          // source: 'default',
-          source: ['fa fa-folder-open', 'fa fa-folder'],
+          source: 'default',
+          // source: ['fa fa-folder-open', 'fa fa-folder'],
           // source: ['../static/arrow_triangle-down.png', '../static/arrow_triangle-right.png'],
           style: '', // ---------style 对默认图标和自定义图标都有效
           size: 'middle', // ----------size 只对默认图标有效
-          color: ['#222'] // --color 只对默认图标有效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色（可省略，省略时表示鼠标经过时icon不变色，所以在下面created中要判断这个值是否省略，如果省略需要将this.icon.color[1]的值设置为和this.icon.color[0]一样）
+          color: ['#222', '#f00'] // --color 只对默认图标有效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色（可省略，省略时表示鼠标经过时icon不变色，所以在下面created中要判断这个值是否省略，如果省略需要将this.icon.color[1]的值设置为和this.icon.color[0]一样）
         }
       }
     },
@@ -106,7 +98,7 @@ export default {
         return {
           branchStyle: {
             color: 'green',
-            background: 'blue'
+            background: '#ccc'
           },
           iconStyle: { // ----iconStyle 对默认图标和自定义图标都有效
             color: 'red'
@@ -116,8 +108,7 @@ export default {
     }
   },
   methods: {
-    clickBranch (id) { // -----------------------------branch 点击事件
-      this.treerouter.push('/abc')
+    clickBranch (id, router) { // -----------------------------branch 点击事件--------------------------------
       if (this.open === 2) { // -------open为2时通过循环将所有同级别的branch都关闭
         let n = 1
         let el
@@ -135,15 +126,19 @@ export default {
 
       if (this.depth === 0 && this.open === 4) this.control['lt-branch_' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
 
-      this.control['lt-branch_' + id][2] = 1 // -----当点击某一个分支时，鼠标肯定是悬停在该分支上的
+      this.renewStyle(id)
+      if (router) {
+        this.treerouter.push(router)
+        this.subActiveClass()
+        this.addActiveClass(id)
+      }
+    },
+    mouseOver (id) { // ----------------鼠标移到branch上时修改this.control------------------------
+      this.mouseOverIndex = id
       this.renewStyle(id)
     },
-    mouseOver (id) { // ----------------鼠标移到branch上时修改this.control
-      this.control['lt-branch_' + id][2] = 1
-      this.renewStyle(id)
-    },
-    mouseOut (id) { // ----------------鼠标移出branch上时修改this.control
-      this.control['lt-branch_' + id][2] = 0
+    mouseOut (id) { // ----------------鼠标移出branch上时修改this.control--------------------------
+      this.mouseOverIndex = 0
       this.renewStyle(id)
     },
     branchStyle (id) { // --------branch的样式
@@ -154,7 +149,7 @@ export default {
       } else {
         branchStyle = this.branchCloseStyle
       }
-      if (this.control['lt-branch_' + id][2] === 1) {
+      if (this.mouseOverIndex === id) {
         branchStyle += this.mouseOverBranchStyle
       }
       return `position: relative;
@@ -179,13 +174,17 @@ export default {
       } else {
         iconStyle = this.iconCloseStyle
       }
-      if (this.control['lt-branch_' + id][2] === 1) { // ---------如果鼠标悬停在分支上
+      if (this.mouseOverIndex === id) { // ---------如果鼠标悬停在该分支上
         iconStyle += this.mouseOverIconStyle
+        // ------------使用第三方图标时鼠标经过时，需要先把设置该颜色的css语句删除再重新添加设置鼠标经过颜色的css语句，而不能简单的把鼠标经过的颜色替换原先的颜色，因为在iconStyle中也许用户会添加设置颜色的css，这个css语句也许会覆盖你想要的css语句，但如果我们在它后面新添加一个css语句就不会被覆盖了
         iconStyle = iconStyle.replace(new RegExp('color:' + this.icon.color[0] + ';', 'gim'), '')
         iconStyle = iconStyle.replace(new RegExp('color: ' + this.icon.color[0] + ';', 'gim'), '') // ---把鼠标经过之前的颜色删掉
-        iconStyle += `color: ${this.icon.color[1]};`
+        iconStyle += `color: ${this.icon.color[1]};` // -----使用第三方图标时修改图标的颜色为鼠标经过的颜色
+
+        iconStyle = iconStyle.replace(new RegExp('solid ' + this.icon.color[0], 'gim'), 'solid ' + this.icon.color[1]) // ---使用默认三角图标时，设置鼠标经过的颜色时只需将这个颜色覆盖原来的颜色就可以了
+      } else {
+        iconStyle = iconStyle.replace(new RegExp('solid ' + this.icon.color[1], 'gim'), 'solid ' + this.icon.color[0])
       }
-      console.log(iconStyle)
       return iconStyle
     },
     branchIconClassName (id) { // ------------------------图标的className(当使用第三方图标库时需要设定className)-------------------
@@ -208,9 +207,57 @@ export default {
         theIconId.className = this.branchIconClassName(id)
       }
       if (theBoxId) theBoxId.style.cssText = this.branchBoxStyle(id)
+    },
+    addActiveClass (id) { // -------点击branch时增加branch的活动className，包括其所有祖先分支都增加活动className，活动className命名规则：一级分支为 lt-branchlevel_active_1，二级分支为 lt-branchlevel_active_2，三级分支为 lt-branchlevel_active_3，以此类推。当前被点击的分支的活动className为：lt-branchlevel_active。
+      if (this.depth > 0) {
+        let theId = id.split('-')
+        document.getElementById('lt-branch_' + theId[0]).className += ' lt-branchlevel_active_1'
+        document.getElementById('lt-branch_' + id).className += ' lt-branchlevel_active'
+
+        let theIdN = theId[0]
+        for (let n = 1; n < theId.length - 1; n++) {
+          theIdN += '-' + theId[n]
+          document.getElementById('lt-branch_' + theIdN).className += ' lt-branchlevel_active_' + (n + 1)
+        }
+      } else {
+        document.getElementById('lt-branch_' + id).className += ' lt-branchlevel_active'
+      }
+    },
+    subActiveClass () { // TODO --------------删除所有branch上的活动className(如何删除？)
+      for (let n = 0; n < this.listData.length; n++) {
+        console.log(this.control)
+      }
     }
   },
   computed: {
+    rightTriangleStyle () {
+      return `border: .35em solid transparent;
+              border-left: .45em solid ${this.triangleColor};
+              height: 0px;
+              width: 0px;
+              position: absolute;
+              transform:translateY(-50%);
+              top: 50%;`
+    },
+    downTriangleStyle () {
+      return `border: .35em solid transparent;
+              border-top: .45em solid ${this.triangleColor};
+              height: 0px;
+              width: 0px;
+              position: absolute;
+              transform:translateY(-50%);
+              top: 50%;`
+    },
+    rightDownTriangleStyle () {
+      return `border: .25em solid transparent;
+              border-bottom: .25em solid ${this.triangleColor};
+              border-right: .25em solid ${this.triangleColor};
+              height: 0px;
+              width: 0px;
+              position: absolute;
+              transform:translateY(-50%);
+              top: 50%;`
+    },
     branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置，该图层的font-size可以控制图标尺寸
       let fontSize = '12px'
       let theLeft = this.indent * this.depth + this.left
@@ -302,15 +349,16 @@ export default {
     if (!this.icon.color[1] || this.icon.color[1] === '') {
       this.icon.color[1] = this.icon.color[0]
     }
-    /* 将类似于下面 control 的值赋给data中的control，这样的话，就可通过this.control.branchLevel1[0]的值来控制分支branchLevel1的展开或闭合，通过控制this.control.branchLevel1[1]的值来控制鼠标经过分支branchLevel1时的样式，通过this.control.branchLevel1[2]的值来判断此时鼠标是否正经过分支branchLevel1。其中branchLevel1中的1与每个分支中的data-index相同，这样每个分支在control中都有个对应的值来控制和判断它的状态。
+    /*
+    将类似于下面 control 的值赋给data中的control，这样的话，就可通过this.control.branchLevel1[0]的值来控制分支branchLevel1的展开或闭合，通过控制this.control.branchLevel1[1]的值来控制鼠标经过分支branchLevel1时的样式。其中branchLevel1中的1与每个分支中的data-index相同，这样每个分支在control中都有个对应的值来控制和判断它的状态。
     control: {
-      branchLevel1: ['close',  this.cursor, 0],
-      branchLevel2: ['close',  this.cursor, 0],
-      branchLevel3: ['close',  this.cursor, 0],
+      branchLevel1: ['close',  this.cursor],
+      branchLevel2: ['close',  this.cursor],
+      branchLevel3: ['close',  this.cursor],
     }
-    */
+     */
     for (let n = 1; n < this.listData.length + 1; n++) {
-      this.$set(this.control, 'lt-branch_' + (this.branchLevel + n), ['close', this.cursor, 0]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式，第三个元素表示鼠标此时是否悬停在该branch上[0为否，1为是])
+      this.$set(this.control, 'lt-branch_' + (this.branchLevel + n), ['close', this.cursor]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式
       this.$set(this.control, 'lt-branchIcon_' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
 
       if (this.open === 1) {
@@ -330,10 +378,6 @@ export default {
 </script>
 <style>
 @import url('Font-Awesome/css/font-awesome.min.css');
-/* .listTreeBranch{
-  position: relative;
-  text-align: left;
-} */
 .lt-branchIconBg{
   width: 20px;
   height: 20px;
