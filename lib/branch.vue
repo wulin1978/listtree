@@ -24,7 +24,11 @@
     </a>
     <!--=============== box ================= 每个branch下都有个box层，branch所有的下级分支都在box内，branch的展开和闭合就可以用box的显示隐藏来实现。另外box与左边框的距离可以实现上下级branch的缩进 -->
     <div :style="branchBoxStyle(branchLevel+(index+1), item.children)" :id="'branchBox'+(branchLevel+(index+1))">
-      <branch :listData="item.children" :indent="indent" v-if="item.children&&item.children.length>0" :branchLevel="branchLevel+(index+1)+'-'" :depth="depth+1" :treerouter="treerouter"></branch>
+      <branch @getClickBranchIndex="getIndex"
+              :clickBranchIndex="clickBranchIndex"
+              :listData="item.children"
+              :indent="indent" v-if="item.children&&item.children.length>0"
+              :branchLevel="branchLevel+(index+1)+'-'" :depth="depth+1" :treerouter="treerouter"></branch>
     </div>
   </div>
 </div>
@@ -52,6 +56,7 @@ export default {
     depth: { // ------------分支级别的深度，一级分支深度为0，二级分支深度为1，三级分支深度为2，以此类推
       default: 0
     },
+    clickBranchIndex: '', // -----------被点击的分支index，由父组件传过来
     treerouter: {
       default: function () {
         return {}
@@ -75,7 +80,7 @@ export default {
       default: 8
     },
     branchSpacing: { // ----垂直方向上分支之间间隔
-      default: 5
+      default: 15
     },
     cursor: { // -----鼠标移到branch上时指针的样式
       default: 'pointer'
@@ -84,25 +89,20 @@ export default {
       default: function () {
         return {
           /* source为 default 的时候图标使用默认的三角图标，source为数组且数组内元素为图片地址的时候，图标为自定义图片，source为数组且数组内元素为className的时候，图标为第三方库图标。数组第一个元素为展开时图标的位置，第二个元素为闭合时图标的位置。自定义图片须放在static文件夹里 */
-          source: 'default',
+          // source: 'default',
           // source: ['fa fa-folder-open', 'fa fa-folder'],
-          // source: ['../static/arrow_triangle-down.png', '../static/arrow_triangle-right.png'],
+          source: ['../static/arrow_triangle-down.png', '../static/arrow_triangle-right.png'],
           style: '', // ---------style 对默认图标和自定义图标都有效
           size: 'middle', // ----------size 只对默认图标有效
-          color: ['#222', '#f00'] // --color 只对默认图标有效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色（可省略，省略时表示鼠标经过时icon不变色，所以在下面created中要判断这个值是否省略，如果省略需要将this.icon.color[1]的值设置为和this.icon.color[0]一样）
+          color: ['#222', '#fff'] // --color 默认图标和第三方图标有效，对自定义图片无效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色（可省略，省略时表示鼠标经过时icon不变色，所以在下面created中要判断这个值是否省略，如果省略需要将this.icon.color[1]的值设置为和this.icon.color[0]一样）
         }
       }
     },
     mouseOverStyle: { // -------鼠标经过时的样式（branchStyle为鼠标经过时branch的样式，iconStyle为鼠标经过时图标的样式，如果是默认图标，在this.icon设置图标的各属性）
       default: function () {
         return {
-          branchStyle: {
-            color: 'green',
-            background: '#ccc'
-          },
-          iconStyle: { // ----iconStyle 对默认图标和自定义图标都有效
-            color: 'red'
-          }
+          branchStyle: {},
+          iconStyle: {} // ----iconStyle 对默认图标和自定义图标都有效
         }
       }
     }
@@ -127,11 +127,15 @@ export default {
       if (this.depth === 0 && this.open === 4) this.control['lt-branch_' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
 
       this.renewStyle(id)
+      console.log(this.clickBranchIndex)
       if (router) {
         this.treerouter.push(router)
-        this.subActiveClass()
-        this.addActiveClass(id)
+        this.setActiveClass(this.clickBranchIndex, id)
       }
+    },
+    getIndex (index) { // ---------------------------------获取当前点击的branch的index，
+      this.$emit('getClickBranchIndex', index) // ---------并把该index值通过自定义事件传给父组件
+      // this.clickBranchIndex_data = index // ---------------同时把该nowclickId值赋予本组件data中的clickBranchIndex_data
     },
     mouseOver (id) { // ----------------鼠标移到branch上时修改this.control------------------------
       this.mouseOverIndex = id
@@ -208,25 +212,38 @@ export default {
       }
       if (theBoxId) theBoxId.style.cssText = this.branchBoxStyle(id)
     },
-    addActiveClass (id) { // -------点击branch时增加branch的活动className，包括其所有祖先分支都增加活动className，活动className命名规则：一级分支为 lt-branchlevel_active_1，二级分支为 lt-branchlevel_active_2，三级分支为 lt-branchlevel_active_3，以此类推。当前被点击的分支的活动className为：lt-branchlevel_active。
-      if (this.depth > 0) {
-        let theId = id.split('-')
+    setActiveClass (lastclickId, nowclickId) { // --------------------设置active className
+      if (lastclickId !== nowclickId) {
+        // ----删除branch上的活动className(这里的参数lastclickId是上次点击的branch的index)
+        let theClickId = document.getElementById('lt-branch_' + lastclickId)
+        if (theClickId) {
+          theClickId.className = theClickId.className.replace(' lt-branch_active', '')
+          for (let n = 0; n < this.listData.length; n++) {
+            let theId = lastclickId.toString().split('-')
+            let thisId0 = document.getElementById('lt-branch_' + theId[0])
+            thisId0.className = thisId0.className.replace(' lt-branchlevel_active_1', '')
+
+            let theIdN = theId[0]
+            for (let n = 1; n < theId.length; n++) {
+              theIdN += '-' + theId[n]
+              let thisIdN = document.getElementById('lt-branch_' + theIdN)
+              thisIdN.className = thisIdN.className.replace(' lt-branchlevel_active_' + (n + 1), '')
+            }
+          }
+        }
+        // -------增加branch的活动className，包括其所有祖先分支都增加活动className，活动className命名规则：一级分支为 lt-branchlevel_active_1，二级分支为 lt-branchlevel_active_2，三级分支为 lt-branchlevel_active_3，以此类推。当前被点击的分支的活动className为：lt-branch_active。
+        let theId = nowclickId.toString().split('-')
         document.getElementById('lt-branch_' + theId[0]).className += ' lt-branchlevel_active_1'
-        document.getElementById('lt-branch_' + id).className += ' lt-branchlevel_active'
 
         let theIdN = theId[0]
-        for (let n = 1; n < theId.length - 1; n++) {
+        for (let n = 1; n < theId.length; n++) {
           theIdN += '-' + theId[n]
           document.getElementById('lt-branch_' + theIdN).className += ' lt-branchlevel_active_' + (n + 1)
         }
-      } else {
-        document.getElementById('lt-branch_' + id).className += ' lt-branchlevel_active'
+        document.getElementById('lt-branch_' + nowclickId).className += ' lt-branch_active'
       }
-    },
-    subActiveClass () { // TODO --------------删除所有branch上的活动className(如何删除？)
-      for (let n = 0; n < this.listData.length; n++) {
-        console.log(this.control)
-      }
+      this.$emit('getClickBranchIndex', nowclickId) // -----自定义事件，向父组件传递当前点击的分支的index
+      // this.clickBranchIndex_data = nowclickId // ----------------同时把该index值赋予本组件data中的clickBranchIndex_data
     }
   },
   computed: {
@@ -373,6 +390,7 @@ export default {
         this.control['lt-branch_' + (this.branchLevel + n)][1] = '' // -----branch上鼠标样式不能被更改（即保留它默认的样式）
       }
     }
+    // console.log(this.clickBranchIndex)
   }
 }
 </script>
