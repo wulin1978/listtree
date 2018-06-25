@@ -5,7 +5,7 @@
     <a :href="item.router">
       <div :id="'lt-branch_'+(branchLevel+(index+1))"
           :data-index="branchLevel+(index+1)"
-          :class="['lt-branch','lt-branchlevel_'+(depth+1),{'lt-branchlevel_0':(!item.children||item.children.length===0)}]"
+          :class="branchClassName(branchLevel+(index+1))"
           :style="branchStyle(branchLevel+(index+1))"
           @click.prevent="clickBranch(branchLevel+(index+1), item.router)"
           @mouseover="mouseOver(branchLevel+(index+1))"
@@ -58,7 +58,6 @@ export default {
   components: {
     Branch
   },
-  // TODO ['branchLevel', 'depth', 'clickBranchIndex', 'listData', 'open', 'indent', 'spacing', 'left', 'branchSpacing', 'cursor', 'icon', 'mouseOverStyle']
   props: {
     branchLevel: { // ---------分支级别，顶级分支为x，二级分支为x-x，三级分支为x-x-x，以此类推
       default: 0
@@ -126,7 +125,7 @@ export default {
         do {
           if ((this.branchLevel + n) !== id) {
             this.control['lt-branch_' + (this.branchLevel + n)][0] = 'close'
-            this.renewStyle(this.branchLevel + n) // -------------------------这里renewStyle刷新的是所有同级的分支样式，函数结尾的renewStyle刷新的只是被点击的分支的style
+            this.renewStyle([this.branchLevel + n]) // -------------------------这里renewStyle刷新的是所有同级的分支样式，函数结尾的renewStyle刷新的只是被点击的分支的style
           }
           n++
           el = document.getElementById('lt-branch_' + (this.branchLevel + n))
@@ -137,11 +136,11 @@ export default {
 
       if (this.depth === 0 && this.open === 4) this.control['lt-branch_' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
 
-      this.renewStyle(id)
       if (router) {
         this.treerouter.push(router)
-        this.setActiveClass(this.clickBranchIndex, id)
+        this.$emit('getClickBranchIndex', id)
       }
+      this.renewStyle([id])
     },
     getIndex (index) { // ---------------------------------获取当前点击的branch的index，
       this.$emit('getClickBranchIndex', index) // ---------并把该index值通过自定义事件传给父组件
@@ -149,11 +148,11 @@ export default {
     },
     mouseOver (id) { // ----------------鼠标移到branch上时修改this.control------------------------
       this.mouseOverIndex = id
-      this.renewStyle(id)
+      this.renewStyle([id])
     },
     mouseOut (id) { // ----------------鼠标移出branch上时修改this.control--------------------------
       this.mouseOverIndex = 0
-      this.renewStyle(id)
+      this.renewStyle([id])
     },
     branchStyle (id) { // --------branch的样式
       let branchStyle = ''
@@ -170,6 +169,32 @@ export default {
               text-align: left;
               ${branchStyle}
               cursor: ${cursor};`
+    },
+    branchClassName (id) { // ------------branch的className
+      let branchClass = ''
+      let theId = id.toString()
+      let theChildren = ''
+      let theData = ''
+
+      if (this.depth === 0) { // --获取branch的children值，如果该branch没有children(即没有子分支)，就给它加上lt-branch_level_0样式
+        theData = this.listData[id - 1]
+        if (theData.children) theChildren = theData.children
+      } else {
+        theData = this.listData[theId.replace(this.branchLevel, '') - 1]
+        if (theData.children) theChildren = theData.children
+      }
+
+      branchClass = 'lt-branch lt-branch_level_' + (this.depth + 1)
+      if (theChildren.length === 0) { // ------如果branch没有子分支，就给branch加上 lt-branch_level_0 样式
+        branchClass += ' lt-branch_level_0'
+      }
+      if (theId === this.clickBranchIndex.toString().substring(0, theId.length)) { // ------判断是否为当前active状态branch的祖先，如果是就加上active状态的className
+        branchClass += ' lt-branch_level_active_' + (this.depth + 1)
+      }
+      if (theId === this.clickBranchIndex) { // ------判断是否为当前active状态branch，如果是就加上active状态的className
+        branchClass += ' lt-branch_active'
+      }
+      return branchClass
     },
     branchBoxStyle (id) { // -------------------------------------box的样式-----------------------
       let theDisplay
@@ -203,92 +228,121 @@ export default {
       return iconStyle
     },
     branchIconClassName (id) { // ------------------------图标的className(当使用第三方图标库时需要设定className)-------------------
-      let iconClass
+      let iconClass = 'lt-branchIcon'
       if (this.control['lt-branch_' + id][0] === 'open') {
-        iconClass = this.iconOpenClassName
+        iconClass += this.iconOpenClassName
       } else {
-        iconClass = this.iconCloseClassName
+        iconClass += this.iconCloseClassName
+      }
+
+      let theId = id.toString()
+      let theChildren = ''
+      let theData = ''
+
+      if (this.depth === 0) { // --获取branch的children值，如果该branch没有children(即没有子分支)，就给它加上lt-branch_level_0样式
+        theData = this.listData[id - 1]
+        if (theData.children) theChildren = theData.children
+      } else {
+        theData = this.listData[theId.replace(this.branchLevel, '') - 1]
+        if (theData.children) theChildren = theData.children
+      }
+
+      if (theChildren.length === 0) { // ------如果branch没有子分支，就给branch加上 lt-branch-icon_level_0 样式
+        iconClass += ' lt-branch-icon_level_0'
+      }
+      if (theId === this.clickBranchIndex.toString().substring(0, theId.length)) { // ------判断是否为当前active状态branch的祖先，如果是就加上active状态的className
+        iconClass += ' lt-branch-Icon_level_active_' + (this.depth + 1)
+      }
+      if (theId === this.clickBranchIndex) { // ------判断是否为当前active状态branch，如果是就加上active状态的className
+        iconClass += ' lt-branch-Icon_active'
       }
       return iconClass
     },
-    renewStyle (id) { // --------刷新branch,box和icon的样式（点击或者鼠标移进移出的时候）
-      let theBranchId = document.getElementById('lt-branch_' + id)
-      let theIconId = document.getElementById('lt-branchIcon_' + id)
-      let theBoxId = document.getElementById('lt-branchBox_' + id)
+    renewStyle (arr) { // --------刷新branch,box和icon的样式（点击或者鼠标移进移出的时候）(arr里面包含的index都刷新)
+      for (let n = 0; n < arr.length + 1; n++) {
+        let id = arr[n]
+        let theBranchId = document.getElementById('lt-branch_' + id)
+        let theIconId = document.getElementById('lt-branchIcon_' + id)
+        let theBoxId = document.getElementById('lt-branchBox_' + id)
 
-      if (theBranchId) theBranchId.style.cssText = this.branchStyle(id)
-      if (theIconId) {
-        theIconId.style.cssText = this.branchIconStyle(id)
-        theIconId.className = this.branchIconClassName(id)
+        if (theBranchId) {
+          theBranchId.style.cssText = this.branchStyle(id)
+          theBranchId.className = this.branchClassName(id)
+        }
+        if (theIconId) {
+          theIconId.style.cssText = this.branchIconStyle(id)
+          theIconId.className = this.branchIconClassName(id)
+        }
+        if (theBoxId) theBoxId.style.cssText = this.branchBoxStyle(id)
       }
-      if (theBoxId) theBoxId.style.cssText = this.branchBoxStyle(id)
-    },
-    setActiveClass (lastclickId, nowclickId) { // --------------------设置active className
-      if (lastclickId !== nowclickId) {
-        // ----删除branch上的活动className(这里的参数lastclickId是上次点击的branch的index)
-        let theClickId = document.getElementById('lt-branch_' + lastclickId)
-        if (theClickId) {
-          theClickId.className = theClickId.className.replace(' lt-branch_active', '')
-          for (let n = 0; n < this.listData.length; n++) {
-            let theId = lastclickId.toString().split('-')
-            let thisId0 = document.getElementById('lt-branch_' + theId[0])
-            thisId0.className = thisId0.className.replace(' lt-branchlevel_active_1', '')
-
-            let theIdN = theId[0]
-            for (let n = 1; n < theId.length; n++) {
-              theIdN += '-' + theId[n]
-              let thisIdN = document.getElementById('lt-branch_' + theIdN)
-              thisIdN.className = thisIdN.className.replace(' lt-branchlevel_active_' + (n + 1), '')
-            }
-          }
-        }
-
-        // ----删除icon上的活动className(这里的参数lastclickId是上次点击的branch的index)
-        let elLaskClickIconId = document.getElementById('lt-branchIcon_' + lastclickId)
-        if (elLaskClickIconId) {
-          elLaskClickIconId.className = elLaskClickIconId.className.replace(' lt-branchIcon_active', '')
-          for (let n = 0; n < this.listData.length; n++) {
-            let theIconId = lastclickId.toString().split('-')
-            let elThisIconId0 = document.getElementById('lt-branchIcon_' + theIconId[0])
-            if (elThisIconId0) elThisIconId0.className = elThisIconId0.className.replace(' lt-branchlevelIcon_active_1', '')
-
-            let theIconIdN = theIconId[0]
-            for (let n = 1; n < theIconId.length; n++) {
-              theIconIdN += '-' + theIconId[n]
-              let elTheIconIdN = document.getElementById('lt-branchIcon_' + theIconIdN)
-              if (elTheIconIdN) elTheIconIdN.className = elTheIconIdN.className.replace(' lt-branchlevelIcon_active_' + (n + 1), '')
-            }
-          }
-        }
-
-        // -------增加branch的活动className，包括其所有祖先分支都增加活动className，活动className命名规则：一级分支为 lt-branchlevel_active_1，二级分支为 lt-branchlevel_active_2，三级分支为 lt-branchlevel_active_3，以此类推。当前被点击的分支的活动className为：lt-branch_active。
-        let theId = nowclickId.toString().split('-')
-        document.getElementById('lt-branch_' + theId[0]).className += ' lt-branchlevel_active_1'
-
-        let theIdN = theId[0]
-        for (let n = 1; n < theId.length; n++) {
-          theIdN += '-' + theId[n]
-          document.getElementById('lt-branch_' + theIdN).className += ' lt-branchlevel_active_' + (n + 1)
-        }
-        document.getElementById('lt-branch_' + nowclickId).className += ' lt-branch_active'
-
-        // -------增加Icon的活动className，包括其所有祖先分支都增加活动className。
-        let theIconId = nowclickId.toString().split('-')
-        let elTheIconId0 = document.getElementById('lt-branchIcon_' + theIconId[0])
-        if (elTheIconId0) elTheIconId0.className += ' lt-branchlevelIcon_active_1'
-
-        let theIconIdN = theIconId[0]
-        for (let n = 1; n < theId.length; n++) {
-          theIconIdN += '-' + theIconId[n]
-          let elTheIconIdN = document.getElementById('lt-branchIcon_' + theIconIdN)
-          if (elTheIconIdN) elTheIconIdN.className += ' lt-branchlevelIcon_active_' + (n + 1)
-        }
-        let elNowClickIconId = document.getElementById('lt-branchIcon_' + nowclickId)
-        if (elNowClickIconId) elNowClickIconId.className += ' lt-branchIcon_active'
-      }
-      this.$emit('getClickBranchIndex', nowclickId) // -----自定义事件，向父组件传递当前点击的分支的index
-      // this.clickBranchIndex_data = nowclickId // ----------------同时把该index值赋予本组件data中的clickBranchIndex_data
     }
+    // setActiveClass (lastclickId, nowclickId) { // --------------------设置active className
+    //   if (lastclickId !== nowclickId) {
+    //     // ----删除branch上的活动className(这里的参数lastclickId是上次点击的branch的index)
+    //     let theClickId = document.getElementById('lt-branch_' + lastclickId)
+    //     if (theClickId) {
+    //       theClickId.className = theClickId.className.replace(' lt-branch_active', '')
+    //       for (let n = 0; n < this.listData.length; n++) {
+    //         let theId = lastclickId.toString().split('-')
+    //         let thisId0 = document.getElementById('lt-branch_' + theId[0])
+    //         thisId0.className = thisId0.className.replace(' lt-branchlevel_active_1', '')
+
+    //         let theIdN = theId[0]
+    //         for (let n = 1; n < theId.length; n++) {
+    //           theIdN += '-' + theId[n]
+    //           let thisIdN = document.getElementById('lt-branch_' + theIdN)
+    //           thisIdN.className = thisIdN.className.replace(' lt-branchlevel_active_' + (n + 1), '')
+    //         }
+    //       }
+    //     }
+
+    //     // ----删除icon上的活动className(这里的参数lastclickId是上次点击的branch的index)
+    //     // let elLaskClickIconId = document.getElementById('lt-branchIcon_' + lastclickId)
+    //     // if (elLaskClickIconId) {
+    //     //   elLaskClickIconId.className = elLaskClickIconId.className.replace(' lt-branchIcon_active', '')
+    //     //   for (let n = 0; n < this.listData.length; n++) {
+    //     //     let theIconId = lastclickId.toString().split('-')
+    //     //     let elThisIconId0 = document.getElementById('lt-branchIcon_' + theIconId[0])
+    //     //     if (elThisIconId0) elThisIconId0.className = elThisIconId0.className.replace(' lt-branchlevelIcon_active_1', '')
+
+    //     //     let theIconIdN = theIconId[0]
+    //     //     for (let n = 1; n < theIconId.length; n++) {
+    //     //       theIconIdN += '-' + theIconId[n]
+    //     //       let elTheIconIdN = document.getElementById('lt-branchIcon_' + theIconIdN)
+    //     //       if (elTheIconIdN) elTheIconIdN.className = elTheIconIdN.className.replace(' lt-branchlevelIcon_active_' + (n + 1), '')
+    //     //     }
+    //     //   }
+    //     }
+
+    //     // -------增加branch的活动className，包括其所有祖先分支都增加活动className，活动className命名规则：一级分支为 lt-branchlevel_active_1，二级分支为 lt-branchlevel_active_2，三级分支为 lt-branchlevel_active_3，以此类推。当前被点击的分支的活动className为：lt-branch_active。
+    //     let theId = nowclickId.toString().split('-')
+    //     document.getElementById('lt-branch_' + theId[0]).className += ' lt-branchlevel_active_1'
+
+    //     let theIdN = theId[0]
+    //     for (let n = 1; n < theId.length; n++) {
+    //       theIdN += '-' + theId[n]
+    //       document.getElementById('lt-branch_' + theIdN).className += ' lt-branchlevel_active_' + (n + 1)
+    //     }
+    //     document.getElementById('lt-branch_' + nowclickId).className += ' lt-branch_active'
+
+    //     // -------增加Icon的活动className，包括其所有祖先分支都增加活动className。
+    //     // let theIconId = nowclickId.toString().split('-')
+    //     // let elTheIconId0 = document.getElementById('lt-branchIcon_' + theIconId[0])
+    //     // console.log(elTheIconId0.className)
+    //     // if (elTheIconId0) elTheIconId0.className += ' lt-branchlevelIcon_active_1'
+
+    //     // let theIconIdN = theIconId[0]
+    //     // for (let n = 1; n < theId.length; n++) {
+    //     //   theIconIdN += '-' + theIconId[n]
+    //     //   let elTheIconIdN = document.getElementById('lt-branchIcon_' + theIconIdN)
+    //     //   if (elTheIconIdN) elTheIconIdN.className += ' lt-branchlevelIcon_active_' + (n + 1)
+    //     // }
+    //     // let elNowClickIconId = document.getElementById('lt-branchIcon_' + nowclickId)
+    //     // if (elNowClickIconId) elNowClickIconId.className += ' lt-branchIcon_active'
+    //   }
+    //   this.$emit('getClickBranchIndex', nowclickId) // -----自定义事件，向父组件传递当前点击的分支的index
+    //   // this.clickBranchIndex_data = nowclickId // ----------------同时把该index值赋予本组件data中的clickBranchIndex_data
+    // }
   },
   computed: {
     iconIsTrue () { // ------判断用户是否设置icon为false
