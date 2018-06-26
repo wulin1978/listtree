@@ -8,16 +8,15 @@
           :class="branchClassName(branchLevel+(index+1))"
           :style="branchStyle(branchLevel+(index+1))"
           @click.prevent="clickBranch(branchLevel+(index+1), item.router)"
-          @mouseover="mouseOver(branchLevel+(index+1))"
           @mouseout="mouseOut(branchLevel+(index+1))">
-        <div :id="'lt-branchIconbg_'+(branchLevel+(index+1))"
-             class='lt-branchIconBg'
+        <div :id="'lt-branch-Icon-bg_'+(branchLevel+(index+1))"
+             class='lt-branch-Icon-Bg'
              :style="branchIconBgStyle"
-             v-if="iconIsTrue&&item.children&&item.children.length>0">
-          <span :id="'lt-branchIcon_'+(branchLevel+(index+1))"
+             v-if="getIcon&&item.children&&item.children.length>0">
+          <span :id="'lt-branch-Icon_'+(branchLevel+(index+1))"
                 :class='branchIconClassName(branchLevel+(index+1))'
                 :style="branchIconStyle(branchLevel+(index+1))"
-                v-if="control['lt-branchIcon_'+(branchLevel+(index+1))]==='show'"></span>
+                v-if="control['lt-branch-Icon_'+(branchLevel+(index+1))]==='show'"></span>
         </div>
         {{item.name}}
       </div>
@@ -34,7 +33,6 @@
               :branchSpacing="branchSpacing"
               :cursor="cursor"
               :icon="icon"
-              :mouseOverStyle="mouseOverStyle"
               :clickBranchIndex="clickBranchIndex"
               @getClickBranchIndex="getIndex"
               :branchLevel="branchLevel+(index+1)+'-'"
@@ -46,13 +44,13 @@
 </template>
 <script>
 import Branch from './branch'
+import IconFont from './icon.json'
 
 export default {
   name: 'branch',
   data () {
     return {
-      control: {}, // -----------------控制各个branch,box,icon的展开或闭合以及鼠标悬停状态
-      mouseOverIndex: 0 // -----鼠标正悬停的branch的index号
+      control: {} // -----------------控制各个branch,box,icon的展开或闭合以及鼠标悬停状态
     }
   },
   components: {
@@ -96,25 +94,7 @@ export default {
       default: 'pointer'
     },
     icon: {
-      default: function () {
-        return {
-          /* source为 default 的时候图标使用默认的三角图标，source为数组且数组内元素为图片地址的时候，图标为自定义图片，source为数组且数组内元素为className的时候，图标为第三方库图标。数组第一个元素为展开时图标的位置，第二个元素为闭合时图标的位置。自定义图片须放在static文件夹里 */
-          // source: 'default',
-          // source: ['fa fa-folder-open', 'fa fa-folder'],
-          source: ['../static/arrow_triangle-down.png', '../static/arrow_triangle-right.png'],
-          style: '', // ---------style 对默认图标和自定义图标都有效
-          size: 'middle', // ----------size 只对默认图标有效
-          color: ['#222', '#fff'] // --color 默认图标和第三方图标有效，对自定义图片无效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色（可省略，省略时表示鼠标经过时icon不变色，所以在下面created中要判断这个值是否省略，如果省略需要将this.iconColor[1]的值设置为和this.iconColor[0]一样）
-        }
-      }
-    },
-    mouseOverStyle: { // -------鼠标经过时的样式（branchStyle为鼠标经过时branch的样式，iconStyle为鼠标经过时图标的样式，如果是默认图标，在this.icon设置图标的各属性）
-      default: function () {
-        return {
-          branchStyle: {},
-          iconStyle: {} // ----iconStyle 对默认图标和自定义图标都有效
-        }
-      }
+      default: 1 // ------icon等于0时表示用户不需要图标，为大于0的整数时为系统自带的图标，为数组时为自定义图标（Font-Awesome和阿里巴巴图标）作为图标，数组第一个元素为展开时图标，第二个元素为闭合时图标，当数组内元素为图片地址时，也可以用自定义图片做图标
     }
   },
   methods: {
@@ -146,14 +126,6 @@ export default {
       this.$emit('getClickBranchIndex', index) // ---------并把该index值通过自定义事件传给父组件
       // this.clickBranchIndex_data = index // ---------------同时把该nowclickId值赋予本组件data中的clickBranchIndex_data
     },
-    mouseOver (id) { // ----------------鼠标移到branch上时修改this.control------------------------
-      this.mouseOverIndex = id
-      this.renewStyle([id])
-    },
-    mouseOut (id) { // ----------------鼠标移出branch上时修改this.control--------------------------
-      this.mouseOverIndex = 0
-      this.renewStyle([id])
-    },
     branchStyle (id) { // --------branch的样式
       let branchStyle = ''
       let cursor = this.control['lt-branch_' + id][1]
@@ -161,9 +133,6 @@ export default {
         branchStyle = this.branchOpenStyle
       } else {
         branchStyle = this.branchCloseStyle
-      }
-      if (this.mouseOverIndex === id) {
-        branchStyle += this.mouseOverBranchStyle
       }
       return `position: relative;
               text-align: left;
@@ -207,28 +176,17 @@ export default {
               display: ${theDisplay};`
     },
     branchIconStyle (id) { // ---------------------------------图标的样式-------------------------
-      if (this.icon === false) return ''
+      if (this.icon === 0) return ''
       let iconStyle
       if (this.control['lt-branch_' + id][0] === 'open') { // ----------分支展开或闭合的情况
         iconStyle = this.iconOpenStyle
       } else {
         iconStyle = this.iconCloseStyle
       }
-      if (this.mouseOverIndex === id) { // ---------如果鼠标悬停在该分支上
-        iconStyle += this.mouseOverIconStyle
-        // ------------使用第三方图标时鼠标经过时，需要先把设置该颜色的css语句删除再重新添加设置鼠标经过颜色的css语句，而不能简单的把鼠标经过的颜色替换原先的颜色，因为在iconStyle中也许用户会添加设置颜色的css，这个css语句也许会覆盖你想要的css语句，但如果我们在它后面新添加一个css语句就不会被覆盖了
-        iconStyle = iconStyle.replace(new RegExp('color:' + this.iconColor[0] + ';', 'gim'), '')
-        iconStyle = iconStyle.replace(new RegExp('color: ' + this.iconColor[0] + ';', 'gim'), '') // ---把鼠标经过之前的颜色删掉
-        iconStyle += `color: ${this.iconColor[1]};` // -----使用第三方图标时修改图标的颜色为鼠标经过的颜色
-
-        iconStyle = iconStyle.replace(new RegExp('solid ' + this.iconColor[0], 'gim'), 'solid ' + this.iconColor[1]) // ---使用默认三角图标时，设置鼠标经过的颜色时只需将这个颜色覆盖原来的颜色就可以了
-      } else {
-        iconStyle = iconStyle.replace(new RegExp('solid ' + this.iconColor[1], 'gim'), 'solid ' + this.iconColor[0])
-      }
       return iconStyle
     },
-    branchIconClassName (id) { // ------------------------图标的className(当使用第三方图标库时需要设定className)-------------------
-      let iconClass = 'lt-branchIcon'
+    branchIconClassName (id) { // ---------------图标的className(当使用默认图标或第三方图标库时需要设定className)-------------------
+      let iconClass = 'lt-branch-Icon '
       if (this.control['lt-branch_' + id][0] === 'open') {
         iconClass += this.iconOpenClassName
       } else {
@@ -262,7 +220,7 @@ export default {
       for (let n = 0; n < arr.length + 1; n++) {
         let id = arr[n]
         let theBranchId = document.getElementById('lt-branch_' + id)
-        let theIconId = document.getElementById('lt-branchIcon_' + id)
+        let theIconId = document.getElementById('lt-branch-Icon_' + id)
         let theBoxId = document.getElementById('lt-branchBox_' + id)
 
         if (theBranchId) {
@@ -349,56 +307,48 @@ export default {
       if (this.icon === false) return false
       return true
     },
-    iconColor () { // ---------图标颜色，用户设置完颜色后全部在这里集成
-      let theColor, mouseOverColor
-      if (typeof this.icon.color === 'string') {
-        theColor = this.icon.color
-        mouseOverColor = this.icon.color
-      } else if (typeof this.icon.color === 'object') {
-        theColor = this.icon.color[0]
-        mouseOverColor = this.icon.color[1]
+    getIcon () { // ---------图标来源，用户设置完来源后全部在这里集成
+      let icon = this.icon
+      if (icon === '' || icon === 'undefined') icon = 1
+      if (!isNaN(parseInt(icon))) {
+        if (icon === 0 || icon === false) return false // -----icon等于0或者false时不显示图标
+        icon = IconFont['icon' + icon] // ----------把icon.json里的数据赋予icon
       }
-      return [theColor, mouseOverColor]
+      return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标
     },
-    iconSource () { // ---------图标来源，用户设置完来源后全部在这里集成
-      let theSource
-      theSource = this.icon.source
-      if (this.icon.source === 'undefined') theSource = 'default'
-      return theSource
-    },
-    triangleColor () {
-      let theColor = '#222'
-      if (this.iconIsTrue) theColor = this.iconColor[0]
-      return theColor
-    },
-    rightTriangleStyle () {
-      return `border: .35em solid transparent;
-              border-left: .45em solid ${this.triangleColor};
-              height: 0px;
-              width: 0px;
-              position: absolute;
-              transform:translateY(-50%);
-              top: 50%;`
-    },
-    downTriangleStyle () {
-      return `border: .35em solid transparent;
-              border-top: .45em solid ${this.triangleColor};
-              height: 0px;
-              width: 0px;
-              position: absolute;
-              transform:translateY(-50%);
-              top: 50%;`
-    },
-    rightDownTriangleStyle () {
-      return `border: .25em solid transparent;
-              border-bottom: .25em solid ${this.triangleColor};
-              border-right: .25em solid ${this.triangleColor};
-              height: 0px;
-              width: 0px;
-              position: absolute;
-              transform:translateY(-50%);
-              top: 50%;`
-    },
+    // triangleColor () {
+    //   let theColor = '#222'
+    //   if (this.iconIsTrue) theColor = this.icon.color
+    //   return theColor
+    // },
+    // rightTriangleStyle () {
+    //   return `border: .35em solid transparent;
+    //           border-left: .45em solid ${this.triangleColor};
+    //           height: 0px;
+    //           width: 0px;
+    //           position: absolute;
+    //           transform:translateY(-50%);
+    //           top: 50%;`
+    // },
+    // downTriangleStyle () {
+    //   return `border: .35em solid transparent;
+    //           border-top: .45em solid ${this.triangleColor};
+    //           height: 0px;
+    //           width: 0px;
+    //           position: absolute;
+    //           transform:translateY(-50%);
+    //           top: 50%;`
+    // },
+    // rightDownTriangleStyle () {
+    //   return `border: .25em solid transparent;
+    //           border-bottom: .25em solid ${this.triangleColor};
+    //           border-right: .25em solid ${this.triangleColor};
+    //           height: 0px;
+    //           width: 0px;
+    //           position: absolute;
+    //           transform:translateY(-50%);
+    //           top: 50%;`
+    // },
     branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置，该图层的font-size可以控制图标尺寸
       if (!this.iconIsTrue) return ''
       let fontSize = '12px'
@@ -412,54 +362,44 @@ export default {
               font-size: ${fontSize}`
     },
     iconOpenStyle () { // -----图标展开时的样式
-      if (!this.iconIsTrue) return ''
-      if (typeof this.iconSource === 'object') {
-        if (this.iconSource[0].indexOf('/') > -1) { // -----------此时用户使用自定义图片来作为图标
-          return `position: absolute;
-                  top: 0;
-                  left: 0;
-                  bottom: 0;
-                  right: 0;
-                  background: url('${this.iconSource[0]}') center no-repeat;`
-        } else { // ---------------------------------------------此时用户使用第三方图标库来作为图标
-          return `position: absolute;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  color: ${this.iconColor[0]};`
-        }
+      if (this.getIcon[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
+        return `position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                background: url('${this.getIcon[0]}') center no-repeat;`
+      } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
+        return `position: absolute;
+                top: 50%;
+                transform: translateY(-50%);`
       }
-      return this.rightDownTriangleStyle
     },
     iconCloseStyle () { // -----图标闭合时的样式
-      if (!this.iconIsTrue) return ''
-      if (typeof this.iconSource === 'object') {
-        if (this.iconSource[0].indexOf('/') > -1) {
-          return `position: absolute;
-                  top: 0;
-                  left: 0;
-                  bottom: 0;
-                  right: 0;
-                  background: url('${this.iconSource[1]}') center no-repeat;`
-        } else {
-          return `position: absolute;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  color: ${this.iconColor[0]};`
-        }
+      if (this.getIcon[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
+        return `position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                background: url('${this.getIcon[1]}') center no-repeat;`
+      } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
+        return `position: absolute;
+                top: 50%;
+                transform: translateY(-50%);`
       }
-      return this.rightTriangleStyle
     },
-    iconOpenClassName () {
-      if (!this.iconIsTrue) return ''
-      if (typeof this.iconSource === 'object' && this.iconSource[0].indexOf('/') === -1) { // ---如果图标是使用第三方图标
-        return this.iconSource[0]
+    iconOpenClassName () { // ----------展开时图标层的className
+      if (!this.getIcon) return ''
+      if (this.getIcon[0].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
+        return this.getIcon[0]
       }
       return ''
     },
-    iconCloseClassName () {
-      if (!this.iconIsTrue) return ''
-      if (typeof this.iconSource === 'object' && this.iconSource[1].indexOf('/') === -1) { // ---如果图标是使用第三方图标
-        return this.iconSource[1]
+    iconCloseClassName () { // ----------闭合时图标层的className
+      if (!this.getIcon) return ''
+      if (this.getIcon[1].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
+        return this.getIcon[1]
       }
       return ''
     },
@@ -475,27 +415,9 @@ export default {
     },
     boxStyle () {
       return ''
-    },
-    mouseOverBranchStyle () { // ----鼠标移到branch上时的样式
-      let overStyle = ''
-      for (let key in this.mouseOverStyle.branchStyle) {
-        overStyle += key + ':' + this.mouseOverStyle.branchStyle[key] + ';'
-      }
-      return overStyle
-    },
-    mouseOverIconStyle () { // ----鼠标移到branch上时icon的样式
-      if (!this.iconIsTrue) return ''
-      let overStyle = ''
-      for (let key in this.mouseOverStyle.iconStyle) {
-        overStyle += key + ':' + this.mouseOverStyle.iconStyle[key] + ';'
-      }
-      return overStyle
     }
   },
   created () {
-    if (this.iconIsTrue && (!this.iconColor[1] || this.iconColor[1] === '')) {
-      this.iconColor[1] = this.iconColor[0]
-    }
     /*
     将类似于下面 control 的值赋给data中的control，这样的话，就可通过this.control.branchLevel1[0]的值来控制分支branchLevel1的展开或闭合，通过控制this.control.branchLevel1[1]的值来控制鼠标经过分支branchLevel1时的样式。其中branchLevel1中的1与每个分支中的data-index相同，这样每个分支在control中都有个对应的值来控制和判断它的状态。
     control: {
@@ -506,7 +428,7 @@ export default {
      */
     for (let n = 1; n < this.listData.length + 1; n++) {
       this.$set(this.control, 'lt-branch_' + (this.branchLevel + n), ['close', this.cursor]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式
-      this.$set(this.control, 'lt-branchIcon_' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
+      this.$set(this.control, 'lt-branch-Icon_' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
 
       if (this.open === 1) {
         this.control['lt-branch_' + (this.branchLevel + n)][0] = 'open' // ----------当open值为1时，所有branch都为展开状态
@@ -516,7 +438,7 @@ export default {
         this.control['lt-branch_1'][0] = 'open' // ----------当open值为2时，只有第一个一级branch为展开状态
       }
       if ((this.open === 4 && this.depth === 0) || !this.listData[n - 1].children || this.listData[n - 1].children.length === 0) {
-        this.control['lt-branchIcon_' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
+        this.control['lt-branch-Icon_' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
         this.control['lt-branch_' + (this.branchLevel + n)][1] = '' // -----branch上鼠标样式不能被更改（即保留它默认的样式）
       }
     }
@@ -524,8 +446,18 @@ export default {
 }
 </script>
 <style>
-@import url('Font-Awesome/css/font-awesome.min.css');
-.lt-branchIconBg{
+@import url("//at.alicdn.com/t/font_722547_htppq8yd7b.css");
+
+.iconfont {
+    font-family:"iconfont" !important;
+    font-style:normal;
+    font-weight: normal;
+    font-size:20px;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+}
+.lt-branch-Icon-Bg{
   width: 20px;
   height: 20px;
   position: absolute;
