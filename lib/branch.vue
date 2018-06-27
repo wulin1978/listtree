@@ -1,3 +1,4 @@
+/* 展开和闭合动画还有问题 */
 <template>
 <div>
   <div v-for="(item, index) in listData" :key="index">
@@ -7,8 +8,7 @@
           :data-index="branchLevel+(index+1)"
           :class="branchClassName(branchLevel+(index+1))"
           :style="branchStyle(branchLevel+(index+1))"
-          @click.prevent="clickBranch(branchLevel+(index+1), item.router)"
-          @mouseout="mouseOut(branchLevel+(index+1))">
+          @click.prevent="clickBranch(branchLevel+(index+1), item.router)">
         <div :id="'lt-branch-Icon-bg_'+(branchLevel+(index+1))"
              class='lt-branch-Icon-Bg'
              :style="branchIconBgStyle"
@@ -17,27 +17,29 @@
                 :class='branchIconClassName(branchLevel+(index+1))'
                 :style="branchIconStyle(branchLevel+(index+1))"
                 v-if="control['lt-branch-Icon_'+(branchLevel+(index+1))]==='show'"></span>
-        </div>
-        {{item.name}}
-      </div>
+        </div>{{item.name}}</div>
     </a>
-    <!--=============== box ================= 每个branch下都有个box层，branch所有的下级分支都在box内，branch的展开和闭合就可以用box的显示隐藏来实现。另外box与左边框的距离可以实现上下级branch的缩进 -->
-    <div :id="'lt-branchBox_'+(branchLevel+(index+1))"
-         :style="branchBoxStyle(branchLevel+(index+1), item.children)">
-      <branch :listData="item.children"
-              :treerouter="treerouter"
-              :open="open"
-              :indent="indent"
-              :spacing="spacing"
-              :left="left"
-              :branchSpacing="branchSpacing"
-              :cursor="cursor"
-              :icon="icon"
-              :clickBranchIndex="clickBranchIndex"
-              @getClickBranchIndex="getIndex"
-              :branchLevel="branchLevel+(index+1)+'-'"
-              :depth="depth+1"
-              v-if="item.children&&item.children.length>0"></branch>
+    <!--=============== animation ================= 每个branch下都有个animation层，是用来实现伸缩动画的 -->
+    <div :id="'lt-branch-animation_'+(branchLevel+(index+1))"
+         :style="branchAnimationStyle(branchLevel+(index+1))">
+      <!--=============== box ================= 每个branch下都有个box层，branch所有的下级分支都在box内，branch的展开和闭合就可以用box的显示隐藏来实现。另外box与左边框的距离可以实现上下级branch的缩进 -->
+      <div :id="'lt-branch-Box_'+(branchLevel+(index+1))"
+          :style="branchBoxStyle(branchLevel+(index+1), item.children)">
+        <branch :listData="item.children"
+                :treerouter="treerouter"
+                :open="open"
+                :indent="indent"
+                :spacing="spacing"
+                :left="left"
+                :branchSpacing="branchSpacing"
+                :cursor="cursor"
+                :icon="icon"
+                :clickBranchIndex="clickBranchIndex"
+                @getClickBranchIndex="getIndex"
+                :branchLevel="branchLevel+(index+1)+'-'"
+                :depth="depth+1"
+                v-if="item.children&&item.children.length>0"></branch>
+      </div>
     </div>
   </div>
 </div>
@@ -50,7 +52,7 @@ export default {
   name: 'branch',
   data () {
     return {
-      control: {} // -----------------控制各个branch,box,icon的展开或闭合以及鼠标悬停状态
+      control: {} // -----------------控制各个branch,box,icon的展开或闭合状态
     }
   },
   components: {
@@ -165,16 +167,6 @@ export default {
       }
       return branchClass
     },
-    branchBoxStyle (id) { // -------------------------------------box的样式-----------------------
-      let theDisplay
-      if (this.control['lt-branch_' + id][0] === 'open') {
-        theDisplay = ''
-      } else {
-        theDisplay = 'none'
-      }
-      return `${this.boxStyle}
-              display: ${theDisplay};`
-    },
     branchIconStyle (id) { // ---------------------------------图标的样式-------------------------
       if (this.icon === 0) return ''
       let iconStyle
@@ -216,12 +208,38 @@ export default {
       }
       return iconClass
     },
+    branchAnimationStyle (id) { // ----animation的样式
+      let theStyle = `transition: height .5s;
+                      overflow: hidden;`
+      let theBoxId = document.getElementById('lt-branch-Box_' + id)
+
+      if (theBoxId) { // ---------打开页面或刷新页面的时候这一步不会执行，因为theBoxId还没加载，这一步是为后面的点击事件准备的
+        console.log(this.control)
+        if (this.control['lt-branch_' + id][0] === 'open') {
+          theStyle += `height:${theBoxId.offsetHeight}px;`
+        } else {
+          theStyle += 'height:0px;'
+        }
+      }
+      return theStyle
+    },
+    branchBoxStyle (id) { // -------------------------------------box的样式-----------------------
+      // let elAnimation = document.getElementById('lt-branch-Animation_' + id)
+      // let elBox = document.getElementById('lt-branch-Box_' + id)
+      // console.log(elBox)
+      // if (this.control['lt-branch_' + id][0] === 'open') { /* 页面加载的时候animation设置高度没有成功，这里补充设置 */
+      //   elAnimation.style.height = `${elBox.offsetHeight}px`
+      // } else {
+      //   elAnimation.style.height = '0px'
+      // }
+      return `${this.boxStyle}`
+    },
     renewStyle (arr) { // --------刷新branch,box和icon的样式（点击或者鼠标移进移出的时候）(arr里面包含的index都刷新)
       for (let n = 0; n < arr.length + 1; n++) {
         let id = arr[n]
         let theBranchId = document.getElementById('lt-branch_' + id)
         let theIconId = document.getElementById('lt-branch-Icon_' + id)
-        let theBoxId = document.getElementById('lt-branchBox_' + id)
+        let theAnimationId = document.getElementById('lt-branch-animation_' + id)
 
         if (theBranchId) {
           theBranchId.style.cssText = this.branchStyle(id)
@@ -231,76 +249,11 @@ export default {
           theIconId.style.cssText = this.branchIconStyle(id)
           theIconId.className = this.branchIconClassName(id)
         }
-        if (theBoxId) theBoxId.style.cssText = this.branchBoxStyle(id)
+        if (theAnimationId) {
+          theAnimationId.style.cssText = this.branchAnimationStyle(id)
+        }
       }
     }
-    // setActiveClass (lastclickId, nowclickId) { // --------------------设置active className
-    //   if (lastclickId !== nowclickId) {
-    //     // ----删除branch上的活动className(这里的参数lastclickId是上次点击的branch的index)
-    //     let theClickId = document.getElementById('lt-branch_' + lastclickId)
-    //     if (theClickId) {
-    //       theClickId.className = theClickId.className.replace(' lt-branch_active', '')
-    //       for (let n = 0; n < this.listData.length; n++) {
-    //         let theId = lastclickId.toString().split('-')
-    //         let thisId0 = document.getElementById('lt-branch_' + theId[0])
-    //         thisId0.className = thisId0.className.replace(' lt-branchlevel_active_1', '')
-
-    //         let theIdN = theId[0]
-    //         for (let n = 1; n < theId.length; n++) {
-    //           theIdN += '-' + theId[n]
-    //           let thisIdN = document.getElementById('lt-branch_' + theIdN)
-    //           thisIdN.className = thisIdN.className.replace(' lt-branchlevel_active_' + (n + 1), '')
-    //         }
-    //       }
-    //     }
-
-    //     // ----删除icon上的活动className(这里的参数lastclickId是上次点击的branch的index)
-    //     // let elLaskClickIconId = document.getElementById('lt-branchIcon_' + lastclickId)
-    //     // if (elLaskClickIconId) {
-    //     //   elLaskClickIconId.className = elLaskClickIconId.className.replace(' lt-branchIcon_active', '')
-    //     //   for (let n = 0; n < this.listData.length; n++) {
-    //     //     let theIconId = lastclickId.toString().split('-')
-    //     //     let elThisIconId0 = document.getElementById('lt-branchIcon_' + theIconId[0])
-    //     //     if (elThisIconId0) elThisIconId0.className = elThisIconId0.className.replace(' lt-branchlevelIcon_active_1', '')
-
-    //     //     let theIconIdN = theIconId[0]
-    //     //     for (let n = 1; n < theIconId.length; n++) {
-    //     //       theIconIdN += '-' + theIconId[n]
-    //     //       let elTheIconIdN = document.getElementById('lt-branchIcon_' + theIconIdN)
-    //     //       if (elTheIconIdN) elTheIconIdN.className = elTheIconIdN.className.replace(' lt-branchlevelIcon_active_' + (n + 1), '')
-    //     //     }
-    //     //   }
-    //     }
-
-    //     // -------增加branch的活动className，包括其所有祖先分支都增加活动className，活动className命名规则：一级分支为 lt-branchlevel_active_1，二级分支为 lt-branchlevel_active_2，三级分支为 lt-branchlevel_active_3，以此类推。当前被点击的分支的活动className为：lt-branch_active。
-    //     let theId = nowclickId.toString().split('-')
-    //     document.getElementById('lt-branch_' + theId[0]).className += ' lt-branchlevel_active_1'
-
-    //     let theIdN = theId[0]
-    //     for (let n = 1; n < theId.length; n++) {
-    //       theIdN += '-' + theId[n]
-    //       document.getElementById('lt-branch_' + theIdN).className += ' lt-branchlevel_active_' + (n + 1)
-    //     }
-    //     document.getElementById('lt-branch_' + nowclickId).className += ' lt-branch_active'
-
-    //     // -------增加Icon的活动className，包括其所有祖先分支都增加活动className。
-    //     // let theIconId = nowclickId.toString().split('-')
-    //     // let elTheIconId0 = document.getElementById('lt-branchIcon_' + theIconId[0])
-    //     // console.log(elTheIconId0.className)
-    //     // if (elTheIconId0) elTheIconId0.className += ' lt-branchlevelIcon_active_1'
-
-    //     // let theIconIdN = theIconId[0]
-    //     // for (let n = 1; n < theId.length; n++) {
-    //     //   theIconIdN += '-' + theIconId[n]
-    //     //   let elTheIconIdN = document.getElementById('lt-branchIcon_' + theIconIdN)
-    //     //   if (elTheIconIdN) elTheIconIdN.className += ' lt-branchlevelIcon_active_' + (n + 1)
-    //     // }
-    //     // let elNowClickIconId = document.getElementById('lt-branchIcon_' + nowclickId)
-    //     // if (elNowClickIconId) elNowClickIconId.className += ' lt-branchIcon_active'
-    //   }
-    //   this.$emit('getClickBranchIndex', nowclickId) // -----自定义事件，向父组件传递当前点击的分支的index
-    //   // this.clickBranchIndex_data = nowclickId // ----------------同时把该index值赋予本组件data中的clickBranchIndex_data
-    // }
   },
   computed: {
     iconIsTrue () { // ------判断用户是否设置icon为false
@@ -316,39 +269,6 @@ export default {
       }
       return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标
     },
-    // triangleColor () {
-    //   let theColor = '#222'
-    //   if (this.iconIsTrue) theColor = this.icon.color
-    //   return theColor
-    // },
-    // rightTriangleStyle () {
-    //   return `border: .35em solid transparent;
-    //           border-left: .45em solid ${this.triangleColor};
-    //           height: 0px;
-    //           width: 0px;
-    //           position: absolute;
-    //           transform:translateY(-50%);
-    //           top: 50%;`
-    // },
-    // downTriangleStyle () {
-    //   return `border: .35em solid transparent;
-    //           border-top: .45em solid ${this.triangleColor};
-    //           height: 0px;
-    //           width: 0px;
-    //           position: absolute;
-    //           transform:translateY(-50%);
-    //           top: 50%;`
-    // },
-    // rightDownTriangleStyle () {
-    //   return `border: .25em solid transparent;
-    //           border-bottom: .25em solid ${this.triangleColor};
-    //           border-right: .25em solid ${this.triangleColor};
-    //           height: 0px;
-    //           width: 0px;
-    //           position: absolute;
-    //           transform:translateY(-50%);
-    //           top: 50%;`
-    // },
     branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置，该图层的font-size可以控制图标尺寸
       if (!this.iconIsTrue) return ''
       let fontSize = '12px'
