@@ -1,4 +1,3 @@
-/* 展开和闭合动画还有问题 */
 <template>
 <div>
   <div v-for="(item, index) in listData" :key="index">
@@ -52,7 +51,8 @@ export default {
   name: 'branch',
   data () {
     return {
-      control: {} // -----------------控制各个branch,box,icon的展开或闭合状态
+      control: {}, // -----------------控制各个branch,box,icon的展开或闭合状态
+      animationTime: 5 // -----------动画执行时间
     }
   },
   components: {
@@ -209,17 +209,11 @@ export default {
       return iconClass
     },
     branchAnimationStyle (id) { // ----animation的样式
-      let theStyle = `transition: height .5s;
-                      overflow: hidden;`
-      let theBoxId = document.getElementById('lt-branch-Box_' + id)
-
-      if (theBoxId) { // ---------打开页面或刷新页面的时候这一步不会执行，因为theBoxId还没加载，这一步是为后面的点击事件准备的
-        console.log(this.control)
-        if (this.control['lt-branch_' + id][0] === 'open') {
-          theStyle += `height:${theBoxId.offsetHeight}px;`
-        } else {
-          theStyle += 'height:0px;'
-        }
+      let theStyle = ''
+      if (this.control['lt-branch_' + id][0] === 'open') {
+        theStyle += this.animationOpenStyle
+      } else {
+        theStyle += this.animationCloseStyle
       }
       return theStyle
     },
@@ -232,7 +226,10 @@ export default {
       // } else {
       //   elAnimation.style.height = '0px'
       // }
-      return `${this.boxStyle}`
+      return `margin:0px;
+              padding:0px;
+              border:0px;
+              ${this.boxStyle}`
     },
     renewStyle (arr) { // --------刷新branch,box和icon的样式（点击或者鼠标移进移出的时候）(arr里面包含的index都刷新)
       for (let n = 0; n < arr.length + 1; n++) {
@@ -250,9 +247,47 @@ export default {
           theIconId.className = this.branchIconClassName(id)
         }
         if (theAnimationId) {
-          theAnimationId.style.cssText = this.branchAnimationStyle(id)
+          this.animation(id)
         }
       }
+    },
+    animation (id) { // --------------------------------展开收缩动画--------------------------------------------
+      let elAnimation = document.getElementById('lt-branch-animation_' + id)
+      elAnimation.style.display = 'block'
+      let elBox = document.getElementById('lt-branch-Box_' + id)
+      let boxH = elBox.offsetHeight
+      let animationH = elAnimation.offsetHeight
+      elAnimation.style.overflowY = 'hidden'
+      /* 发现将overflow设为hidden后，div里的内容和边框的距离会增加， 所以这里暂时将elBox的margin-top设为负值以抵消和边框距离的增加 */
+      elBox.style.marginTop = '-15px'
+
+      let addHeight = 5 // -----每次增加或减小的高度
+      if (this.control['lt-branch_' + id][0] === 'open') { // -----当前该id的状态open是点击branch后改的，改动后立即执行animation，说明原来是闭合的，现在要在animation里面通过动画的方式展开来
+        console.log(this.control['lt-branch_' + id] + ':' + animationH + '///' + boxH)
+        elAnimation.style.height = (animationH + addHeight) + 'px'
+        if (animationH > boxH || animationH === boxH) { // -------如果elAnimation的高大于elBox的高，把elAnimation的style设为animationOpenStyle，同时退出循环
+          elAnimation.style.cssText = this.animationOpenStyle
+          elBox.style.marginTop = ''
+          return
+        }
+      } else {
+        if (animationH < addHeight || animationH === addHeight) { // -------如果elAnimation的高小于等于addHeight，把elAnimation的style设为animationCloseStyle，同时退出循环
+          console.log(animationH + '????' + this.control['lt-branch_' + id])
+          elAnimation.style.cssText = this.animationCloseStyle
+          elBox.style.marginTop = ''
+          return
+        }
+        console.log(this.control['lt-branch_' + id] + ':' + animationH + '///' + boxH)
+        console.log(elAnimation.offsetHeight + '####')
+        elAnimation.style.height = (animationH - 5) + 'px'
+        console.log(elAnimation.offsetHeight + '@@@@')
+      }
+
+      console.log(elAnimation.offsetHeight + '///111111')
+      setTimeout(() => {
+        console.log(elAnimation.offsetHeight + '///0000000000')
+        this.animation(id)
+      }, this.animationTime)
     }
   },
   computed: {
@@ -267,6 +302,7 @@ export default {
         if (icon === 0 || icon === false) return false // -----icon等于0或者false时不显示图标
         icon = IconFont['icon' + icon] // ----------把icon.json里的数据赋予icon
       }
+      console.log(this.icon)
       return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标
     },
     branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置，该图层的font-size可以控制图标尺寸
@@ -333,6 +369,18 @@ export default {
       return `padding-left: ${theLeft}px;
               margin: ${this.branchSpacing}px 0px;`
     },
+    animationOpenStyle () {
+      return `margin:0px;
+              padding:0px;
+              border:0px;`
+    },
+    animationCloseStyle () {
+      return `margin:0px;
+              padding:0px;
+              border:0px;
+              height:0px;
+              display:none;`
+    },
     boxStyle () {
       return ''
     }
@@ -341,9 +389,9 @@ export default {
     /*
     将类似于下面 control 的值赋给data中的control，这样的话，就可通过this.control.branchLevel1[0]的值来控制分支branchLevel1的展开或闭合，通过控制this.control.branchLevel1[1]的值来控制鼠标经过分支branchLevel1时的样式。其中branchLevel1中的1与每个分支中的data-index相同，这样每个分支在control中都有个对应的值来控制和判断它的状态。
     control: {
-      branchLevel1: ['close',  this.cursor],
-      branchLevel2: ['close',  this.cursor],
-      branchLevel3: ['close',  this.cursor],
+      lt-branch_1: ['close',  this.cursor],
+      lt-branch_2: ['close',  this.cursor],
+      lt-branch_3: ['close',  this.cursor],
     }
      */
     for (let n = 1; n < this.listData.length + 1; n++) {

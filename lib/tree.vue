@@ -9,7 +9,6 @@
             :branchSpacing="branchSpacing"
             :cursor="cursor"
             :icon="icon"
-            :mouseOverStyle="mouseOverStyle"
             :clickBranchIndex="clickBranchIndex"
             @getClickBranchIndex="getIndex"></branch>
   </div>
@@ -58,25 +57,7 @@ export default {
       default: 'pointer'
     },
     icon: {
-      default: function () {
-        return {
-          /* source为 default 的时候图标使用默认的三角图标，source为数组且数组内元素为图片地址的时候，图标为自定义图片，source为数组且数组内元素为className的时候，图标为第三方库图标。数组第一个元素为展开时图标的位置，第二个元素为闭合时图标的位置。自定义图片须放在static文件夹里 */
-          // source: 'default',
-          source: ['fa fa-folder-open', 'fa fa-folder'],
-          // source: ['../static/arrow_triangle-down.png', '../static/arrow_triangle-right.png'],
-          style: '', // ---------style 对所有图标都有效
-          size: 'middle', // ----------size 对自定义图片图标无效效
-          color: ['#222', ''] // --color 默认图标和第三方图标有效，对自定义图片无效，数组第一个元素是图标颜色，第二个元素为鼠标经过branch时图标的颜色（可省略，省略时表示鼠标经过时icon不变色，所以在下面created中要判断这个值是否省略，如果省略需要将this.icon.color[1]的值设置为和this.icon.color[0]一样）
-        }
-      }
-    },
-    mouseOverStyle: { // -------鼠标经过时的样式（branchStyle为鼠标经过时branch的样式，iconStyle为鼠标经过时图标的样式，如果是默认图标，在this.icon设置图标的各属性）
-      default: function () {
-        return {
-          branchStyle: {},
-          iconStyle: {} // ----iconStyle 对所有图标都有效
-        }
-      }
+      default: 1
     }
   },
   methods: {
