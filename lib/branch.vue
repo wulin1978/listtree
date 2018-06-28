@@ -4,6 +4,7 @@
     <!-- ========= branch ===========树形结构中每个目录为一个独立的分支（branch），一级branch的index为X，二级branch的index为：X-X，三级branch的index为：X-X-X，以此类推 -->
     <!-- 层的编号（index）设计规则：一级分支用一个数字表示，二级用2个数字中间连一个“-”表示，三级分支用三个数字，每个数字中间连“-”……，比如：A-B-C-D-……，其中A表示所属一级分支编号，B表示所属二级分支编号，C表示所属三级分支编号……； -->
     <!-- id 前缀命名规则：branch的前缀为 lt-branch_ ，图标层的前缀为 lt-branch-icon_ ，图标基座的前缀为 lt-branch-icon-bg_ ，animation(动画)层前缀为：lt-branch-animation_，box层的前缀为 lt-branch-box_ 。层的 id 就是：前缀+编号 -->
+    <!-- className 规则：所有分支branch都含有 lt-branch，所有的图标都包含：lt-branch-icon；所有一级分支都包含 lt-branch_level_1，二级分支包含：lt-branch_level_2，三级分支包含：lt-branch_level_3……；所有一级分支图标都包含：lt-branch-icon_level_1，所有二级分支图标包含：lt-branch-icon_level_2，所有三级图标包含：lt-branch-icon_level_3……，如果一个分支下面没有下级分支，那么该分支将包含：lt-branch-icon_level_0；当前被点击的分支包含：lt-branch_active，当前被点击的分支图标包含：lt-branch-icon_active，一级分支下级子孙分支被点击后该一级分支将包含：lt-branch_level_1_active，该一级分支的图标将包含： lt-branch-icon_level_1_active，二级分支下级子孙分支被点击后该二级分支将包含：lt-branch_level_2_active，该二级分支的图标将包含： lt-branch-icon_level_2_active，三级分支下级子孙分支被点击后该三级分支将包含：lt-branch_level_3_active，该三级分支的图标将包含： lt-branch-icon_level_3_active……。后面带有active的分支表示正在活动的分支，但只有点击可以打开新路由内容的branch（即在listData中该branch包含router属性）才能触发active。 -->
     <a :href="item.router">
       <div :id="'lt-branch_'+(branchLevel+(index+1))"
           :data-index="branchLevel+(index+1)"
@@ -11,13 +12,13 @@
           :style="branchStyle(branchLevel+(index+1))"
           @click.prevent="clickBranch(branchLevel+(index+1), item.router)">
         <div :id="'lt-branch-icon-bg_'+(branchLevel+(index+1))"
-             class='lt-branch-Icon-Bg'
+             class='lt-branch-icon-Bg'
              :style="branchIconBgStyle"
              v-if="getIcon&&item.children&&item.children.length>0">
-          <span :id="'lt-branch-Icon_'+(branchLevel+(index+1))"
+          <span :id="'lt-branch-icon_'+(branchLevel+(index+1))"
                 :class='branchIconClassName(branchLevel+(index+1))'
                 :style="branchIconStyle(branchLevel+(index+1))"
-                v-if="control['lt-branch-Icon_'+(branchLevel+(index+1))]==='show'"></span>
+                v-if="control['lt-branch-icon_'+(branchLevel+(index+1))]==='show'"></span>
         </div>{{item.name}}</div>
     </a>
     <!--=============== animation ================= 每个branch下都有个animation层，是用来实现伸缩动画的 -->
@@ -30,10 +31,6 @@
                 :treerouter="treerouter"
                 :open="open"
                 :indent="indent"
-                :spacing="spacing"
-                :left="left"
-                :branchSpacing="branchSpacing"
-                :cursor="cursor"
                 :icon="icon"
                 :animation="animation"
                 :clickBranchIndex="clickBranchIndex"
@@ -62,13 +59,13 @@ export default {
     Branch
   },
   props: {
-    branchLevel: { // ---------分支级别，顶级分支为x，二级分支为x-x，三级分支为x-x-x，以此类推
+    branchLevel: { // ---------分支级别，顶级分支为x，二级分支为x-x，三级分支为x-x-x，以此类推，系统会自动分别一级一级往下传递
       default: 0
     },
-    depth: { // ------------分支级别的深度，一级分支深度为0，二级分支深度为1，三级分支深度为2，以此类推
+    depth: { // ------------分支级别的深度，一级分支深度为0，二级分支深度为1，三级分支深度为2，以此类推，系统会自动分别一级一级往下传递
       default: 0
     },
-    clickBranchIndex: '', // -----------被点击的分支index，由父组件传过来
+    clickBranchIndex: '', // -----------被点击的分支index，用户在分支上点击（处于组件branch.vue中）后会触发getClickBranchIndex事件，上一级组件（上一级branch.vue）监听到getClickBranchIndex后再运行getIndex事件，getIndex事件里又触发getClickBranchIndex事件往上传递，一直到组件tree.vue监听到getClickBranchIndex事件后更改data中的clickBranchIndex，tree.vue下所有的组件都会接受到clickBranchIndex的更改
     treerouter: { // ------------------------路由信息
       default: function () {
         return {}
@@ -85,18 +82,6 @@ export default {
     },
     indent: { // -----子级分支相对父级分支的缩进距离
       default: 24
-    },
-    spacing: { // -----目录文字与图标间的距离
-      default: 18
-    },
-    left: { // ---列表树与左边框之间的距离
-      default: 8
-    },
-    branchSpacing: { // ----垂直方向上分支之间间隔
-      default: 15
-    },
-    cursor: { // -----鼠标移到branch上时指针的样式
-      default: 'pointer'
     },
     icon: {
       default: 1 // ------icon等于0时表示用户不需要图标，为大于0的整数时为系统自带的图标，为数组时为自定义图标（Font-Awesome和阿里巴巴图标）作为图标，数组第一个元素为展开时图标，第二个元素为闭合时图标，当数组内元素为图片地址时，也可以用自定义图片做图标
@@ -135,7 +120,6 @@ export default {
     },
     branchStyle (id) { // --------branch的样式
       let branchStyle = ''
-      let cursor = this.control['lt-branch_' + id][1]
       if (this.control['lt-branch_' + id][0] === 'open') {
         branchStyle = this.branchOpenStyle
       } else {
@@ -143,8 +127,7 @@ export default {
       }
       return `position: relative;
               text-align: left;
-              ${branchStyle}
-              cursor: ${cursor};`
+              ${branchStyle}`
     },
     branchClassName (id) { // ------------branch的className
       let branchClass = ''
@@ -160,14 +143,19 @@ export default {
         if (theData.children) theChildren = theData.children
       }
 
-      branchClass = 'lt-branch lt-branch_level_' + (this.depth + 1)
+      branchClass = 'lt-branch lt-branch_level_' + (this.depth + 1) // --------添加常规分支className和当前级别的className
       if (theChildren.length === 0) { // ------如果branch没有子分支，就给branch加上 lt-branch_level_0 样式
         branchClass += ' lt-branch_level_0'
       }
-      if (theId === this.clickBranchIndex.toString().substring(0, theId.length)) { // ------判断是否为当前active状态branch的祖先，如果是就加上active状态的className
-        branchClass += ' lt-branch_level_active_' + (this.depth + 1)
+      if (theId.toString() === this.clickBranchIndex.toString().substring(0, theId.length)) { // ------判断是否为当前active状态branch的祖先，如果是就加上active状态的className
+        branchClass += ' lt-branch_level_' + (this.depth + 1) + '_active'
       }
-      if (theId === this.clickBranchIndex) { // ------判断是否为当前active状态branch，如果是就加上active状态的className
+      /* 用被点击分支index减掉当前分支的index剩余部分包含一个"-"，即表示当前分支仅仅比被点击分支高一级（如果高一级以上，那么replace后剩余部分一定会包含多个"-"），为了消除特殊index带来的buger，在判断的时候clickBranchIndex和theId前都加了一个字母，并且最后得加一个判断："-"在第一个位置 */
+      let str = ('a' + this.clickBranchIndex.toString()).replace(('a' + theId.toString()), '')
+      if ((str.split('-').length - 1 === 1) && str.indexOf('-') === 0) {
+        branchClass += ' lt-branch_active_parent'
+      }
+      if (theId.toString() === this.clickBranchIndex.toString()) { // ------判断是否为当前active状态branch，如果是就加上active状态的className
         branchClass += ' lt-branch_active'
       }
       return branchClass
@@ -183,13 +171,14 @@ export default {
       return iconStyle
     },
     branchIconClassName (id) { // ---------------图标的className(当使用默认图标或第三方图标库时需要设定className)-------------------
-      let iconClass = 'lt-branch-Icon '
+      let iconClass = ''
       if (this.control['lt-branch_' + id][0] === 'open') {
         iconClass += this.iconOpenClassName
       } else {
         iconClass += this.iconCloseClassName
       }
 
+      iconClass += ' lt-branch-icon lt-branch-icon_level_' + (this.depth + 1) // --------添加常规分支图标className和当前级别图标的className
       let theId = id.toString()
       let theChildren = ''
       let theData = ''
@@ -205,11 +194,11 @@ export default {
       if (theChildren.length === 0) { // ------如果branch没有子分支，就给branch加上 lt-branch-icon_level_0 样式
         iconClass += ' lt-branch-icon_level_0'
       }
-      if (theId === this.clickBranchIndex.toString().substring(0, theId.length)) { // ------判断是否为当前active状态branch的祖先，如果是就加上active状态的className
-        iconClass += ' lt-branch-Icon_level_active_' + (this.depth + 1)
+      if (theId.toString() === this.clickBranchIndex.toString().substring(0, theId.length)) { // ------判断是否为当前active状态branch的祖先，如果是就加上active状态的className
+        iconClass += ' lt-branch-icon_level_' + (this.depth + 1) + '_active'
       }
-      if (theId === this.clickBranchIndex) { // ------判断是否为当前active状态branch，如果是就加上active状态的className
-        iconClass += ' lt-branch-Icon_active'
+      if (theId.toString() === this.clickBranchIndex.toString()) { // ------判断是否为当前active状态branch，如果是就加上active状态的className
+        iconClass += ' lt-branch-icon_active'
       }
       return iconClass
     },
@@ -241,7 +230,7 @@ export default {
       for (let n = 0; n < arr.length + 1; n++) {
         let id = arr[n]
         let theBranchId = document.getElementById('lt-branch_' + id)
-        let theIconId = document.getElementById('lt-branch-Icon_' + id)
+        let theIconId = document.getElementById('lt-branch-icon_' + id)
         let theAnimationId = document.getElementById('lt-branch-animation_' + id)
 
         if (theBranchId) {
@@ -307,17 +296,9 @@ export default {
       }
       return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标
     },
-    branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置，该图层的font-size可以控制图标尺寸
+    branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置
       if (!this.iconIsTrue) return ''
-      let fontSize = '12px'
-      let theLeft = this.indent * this.depth + this.left
-      if (this.icon.size === 'large') {
-        fontSize = '20px'
-      } else if (this.icon.size === 'middle') {
-        fontSize = '16px'
-      }
-      return `left: ${theLeft}px;
-              font-size: ${fontSize}`
+      return `left: ${this.indent * this.depth}px;`
     },
     iconOpenStyle () { // -----图标展开时的样式
       if (this.getIcon[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
@@ -362,14 +343,10 @@ export default {
       return ''
     },
     branchOpenStyle () { // ---branch展开时的样式
-      let theLeft = this.indent * this.depth + this.spacing + this.left
-      return `padding-left: ${theLeft}px;
-              margin: ${this.branchSpacing}px 0px;`
+      return `padding-left: ${this.indent * this.depth + 20}px;`
     },
     branchCloseStyle () { // ---branch闭合时的样式
-      let theLeft = this.indent * this.depth + this.spacing + this.left
-      return `padding-left: ${theLeft}px;
-              margin: ${this.branchSpacing}px 0px;`
+      return `padding-left: ${this.indent * this.depth + 20}px;`
     },
     animationOpenStyle () {
       return `margin:0px;
@@ -389,16 +366,16 @@ export default {
   },
   created () {
     /*
-    将类似于下面 control 的值赋给data中的control，这样的话，就可通过this.control.branchLevel1[0]的值来控制分支branchLevel1的展开或闭合，通过控制this.control.branchLevel1[1]的值来控制鼠标经过分支branchLevel1时的样式。其中branchLevel1中的1与每个分支中的data-index相同，这样每个分支在control中都有个对应的值来控制和判断它的状态。
+    将类似于下面 control 的值赋给data中的control，这样的话，就可通过this.control.branchLevel1[0]的值来控制分支branchLevel1的展开或闭合。其中branchLevel1中的1与每个分支中的data-index相同，这样每个分支在control中都有个对应的值来控制和判断它的状态。
     control: {
-      lt-branch_1: ['close',  this.cursor],
-      lt-branch_2: ['close',  this.cursor],
-      lt-branch_3: ['close',  this.cursor],
+      lt-branch_1: ['close'],
+      lt-branch_2: ['close'],
+      lt-branch_3: ['close'],
     }
      */
     for (let n = 1; n < this.listData.length + 1; n++) {
-      this.$set(this.control, 'lt-branch_' + (this.branchLevel + n), ['close', this.cursor]) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式
-      this.$set(this.control, 'lt-branch-Icon_' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
+      this.$set(this.control, 'lt-branch_' + (this.branchLevel + n), ['close']) // ----------默认情况，所有branch都为闭合状态，且可以控制鼠标样式(数组第一个元素表示branch的展开或闭合状态['open'为展开，'close'为闭合]，第二个元素表示鼠标移到branch上时鼠标样式
+      this.$set(this.control, 'lt-branch-icon_' + (this.branchLevel + n), 'show') // ----------默认情况，所有icon都为显示状态('show'为显示，'hidden'为隐藏)
 
       if (this.open === 1) {
         this.control['lt-branch_' + (this.branchLevel + n)][0] = 'open' // ----------当open值为1时，所有branch都为展开状态
@@ -408,8 +385,7 @@ export default {
         this.control['lt-branch_1'][0] = 'open' // ----------当open值为2时，只有第一个一级branch为展开状态
       }
       if ((this.open === 4 && this.depth === 0) || !this.listData[n - 1].children || this.listData[n - 1].children.length === 0) {
-        this.control['lt-branch-Icon_' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
-        this.control['lt-branch_' + (this.branchLevel + n)][1] = '' // -----branch上鼠标样式不能被更改（即保留它默认的样式）
+        this.control['lt-branch-icon_' + (this.branchLevel + n)] = 'hidden' // ----------当open为4且branch为一级分支或者该branch没有children字段或children字段长度为0时，该branch前的icon为隐藏状态
       }
     }
   }
@@ -427,7 +403,7 @@ export default {
     -webkit-text-stroke-width: 0.2px;
     -moz-osx-font-smoothing: grayscale;
 }
-.lt-branch-Icon-Bg{
+.lt-branch-icon-Bg{
   width: 20px;
   height: 20px;
   position: absolute;

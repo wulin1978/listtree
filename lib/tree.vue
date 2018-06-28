@@ -3,12 +3,8 @@
     <branch :listData="listData"
             :treerouter="treerouter"
             :open="open"
-            :indent="indent"
-            :spacing="spacing"
-            :left="left"
-            :branchSpacing="branchSpacing"
-            :cursor="cursor"
             :icon="icon"
+            :animation="animation"
             :clickBranchIndex="clickBranchIndex"
             @getClickBranchIndex="getIndex"></branch>
   </div>
@@ -26,40 +22,7 @@ export default {
       clickBranchIndex: '' // -----------被点击的分支index，当用户点击branch时赋值
     }
   },
-  props: {
-    listData: { // -----------json格式的数据，每个分支目录有name,router,icon,children四个个字段，name为分支的文字内容（必须有）。router为点击分支时跳转的路由地址,如果不跳转可省略router字段。icon为该分支前的图标地址（包括展开时和闭合时的图标，所以icon是个数组），如果使用默认图标icon字段可以省略。children为该分支的下级分支，如果没有下级分支children字段也可以省略
-      default: function () {
-        return []
-      }
-    },
-    treerouter: { // ------------------------路由信息，该信息用户必须传输，否则链接无法跳转
-      default: function () {
-        return {}
-      }
-    },
-    // -------------以上treerouter和listData用户必须传输，以下信息用户可根据自己的需要传输----------------------------
-    open: {// -------------------------------设置初始状态下各分支展开或闭合情况
-      default: 1
-    },
-    indent: { // -----子级分支相对父级分支的缩进距离
-      default: 24
-    },
-    spacing: { // -----目录文字与图标间的距离
-      default: 18
-    },
-    left: { // ---列表树与左边框之间的距离
-      default: 8
-    },
-    branchSpacing: { // ----垂直方向上分支之间间隔
-      default: 15
-    },
-    cursor: { // -----鼠标移到branch上时指针的样式
-      default: 'pointer'
-    },
-    icon: {
-      default: 1
-    }
-  },
+  props: ['treerouter', 'listData', 'open', 'indent', 'icon', 'animation'],
   methods: {
     getIndex (index) {
       this.clickBranchIndex = index
