@@ -258,7 +258,7 @@ export default {
       let animationH = elAnimation.offsetHeight
       elAnimation.style.overflowY = 'hidden'
       /* 发现将overflow设为hidden后，div里的内容和边框的距离会增加， 所以这里暂时将elBox的margin-top设为负值以抵消和边框距离的增加 */
-      elBox.style.marginTop = '-15px'
+      // elBox.style.marginTop = '-15px'
 
       let addHeight = 5 // -----每次增加或减小的高度
       if (this.control['lt-branch_' + id][0] === 'open') { // -----当前该id的状态open是点击branch后改的，改动后立即执行animation，说明原来是闭合的，现在要在animation里面通过动画的方式展开来
@@ -297,6 +297,7 @@ export default {
       return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标
     },
     branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置
+      console.log(this.indent)
       if (!this.iconIsTrue) return ''
       return `left: ${this.indent * this.depth}px;`
     },
@@ -392,7 +393,7 @@ export default {
 }
 </script>
 <style>
-@import url("//at.alicdn.com/t/font_722547_htppq8yd7b.css");
+@import url("./icon/iconfont.css");
 
 .iconfont {
     font-family:"iconfont" !important;
