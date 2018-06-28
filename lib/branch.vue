@@ -33,6 +33,7 @@
                 :branchSpacing="branchSpacing"
                 :cursor="cursor"
                 :icon="icon"
+                :animation="animation"
                 :clickBranchIndex="clickBranchIndex"
                 @getClickBranchIndex="getIndex"
                 :branchLevel="branchLevel+(index+1)+'-'"
@@ -52,7 +53,7 @@ export default {
   data () {
     return {
       control: {}, // -----------------控制各个branch,box,icon的展开或闭合状态
-      animationTime: 5 // -----------动画执行时间
+      animationTime: 3 // -----------动画执行时间
     }
   },
   components: {
@@ -97,6 +98,9 @@ export default {
     },
     icon: {
       default: 1 // ------icon等于0时表示用户不需要图标，为大于0的整数时为系统自带的图标，为数组时为自定义图标（Font-Awesome和阿里巴巴图标）作为图标，数组第一个元素为展开时图标，第二个元素为闭合时图标，当数组内元素为图片地址时，也可以用自定义图片做图标
+    },
+    animation: {
+      default: 1
     }
   },
   methods: {
@@ -126,7 +130,6 @@ export default {
     },
     getIndex (index) { // ---------------------------------获取当前点击的branch的index，
       this.$emit('getClickBranchIndex', index) // ---------并把该index值通过自定义事件传给父组件
-      // this.clickBranchIndex_data = index // ---------------同时把该nowclickId值赋予本组件data中的clickBranchIndex_data
     },
     branchStyle (id) { // --------branch的样式
       let branchStyle = ''
@@ -209,13 +212,15 @@ export default {
       return iconClass
     },
     branchAnimationStyle (id) { // ----animation的样式
-      let theStyle = ''
-      if (this.control['lt-branch_' + id][0] === 'open') {
-        theStyle += this.animationOpenStyle
-      } else {
-        theStyle += this.animationCloseStyle
+      if (this.clickBranchIndex !== id) { // ------点击带有router属性的分支时，都会到祖先组件更新clickBranchIndex，祖先组件再把clickBranchIndex传给子组件，那么组件中的animation层就会立即闭合或展开，而动画由于是用setTimeout函数执行，它会在vue的下一帧才执行完，可那时候branch的状态已经发生改变，本来是执行展开动画的，可是动画还没执行就已经展开了，或者本来执行闭合动画的，动画还没执行branch就已经闭合了，所以这里禁止正在执行动画的branch改变状态（也就是this.clickBranchIndex不能等于当前id）
+        let theStyle = ''
+        if (this.control['lt-branch_' + id][0] === 'open') {
+          theStyle += this.animationOpenStyle
+        } else {
+          theStyle += this.animationCloseStyle
+        }
+        return theStyle
       }
-      return theStyle
     },
     branchBoxStyle (id) { // -------------------------------------box的样式-----------------------
       // let elAnimation = document.getElementById('lt-branch-Animation_' + id)
@@ -247,11 +252,15 @@ export default {
           theIconId.className = this.branchIconClassName(id)
         }
         if (theAnimationId) {
-          this.animation(id)
+          if (this.animation === 0 || this.animation === false) {
+            theAnimationId.style.cssText = this.branchAnimationStyle(id)
+          } else {
+            this.doAnimation(id)
+          }
         }
       }
     },
-    animation (id) { // --------------------------------展开收缩动画--------------------------------------------
+    doAnimation (id) { // --------------------------------展开收缩动画--------------------------------------------
       let elAnimation = document.getElementById('lt-branch-animation_' + id)
       elAnimation.style.display = 'block'
       let elBox = document.getElementById('lt-branch-Box_' + id)
@@ -283,10 +292,10 @@ export default {
         console.log(elAnimation.offsetHeight + '@@@@')
       }
 
-      console.log(elAnimation.offsetHeight + '///111111')
+      console.log(elAnimation.offsetHeight + '///111111|||' + this.clickBranchIndex)
       setTimeout(() => {
-        console.log(elAnimation.offsetHeight + '///0000000000')
-        this.animation(id)
+        console.log(elAnimation.offsetHeight + '///0000000000|||' + this.clickBranchIndex)
+        this.doAnimation(id)
       }, this.animationTime)
     }
   },
