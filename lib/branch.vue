@@ -2,13 +2,16 @@
 <div>
   <div v-for="(item, index) in listData" :key="index">
     <!-- ========= branch ===========树形结构中每个目录为一个独立的分支（branch），一级branch的index为X，二级branch的index为：X-X，三级branch的index为：X-X-X，以此类推 -->
+    <!-- 层的编号（index）设计规则：一级分支用一个数字表示，二级用2个数字中间连一个“-”表示，三级分支用三个数字，每个数字中间连“-”……，比如：A-B-C-D-……，其中A表示所属一级分支编号，B表示所属二级分支编号，C表示所属三级分支编号……； -->
+    <!-- id 前缀命名规则：branch的前缀为 lt-branch_ ，图标层的前缀为 lt-branch-icon_ ，图标基座的前缀为 lt-branch-icon-bg_ ，animation(动画)层前缀为：lt-branch-animation_，box层的前缀为 lt-branch-box_ 。层的 id 就是：前缀+编号 -->
+
     <a :href="item.router">
       <div :id="'lt-branch_'+(branchLevel+(index+1))"
           :data-index="branchLevel+(index+1)"
           :class="branchClassName(branchLevel+(index+1))"
           :style="branchStyle(branchLevel+(index+1))"
           @click.prevent="clickBranch(branchLevel+(index+1), item.router)">
-        <div :id="'lt-branch-Icon-bg_'+(branchLevel+(index+1))"
+        <div :id="'lt-branch-icon-bg_'+(branchLevel+(index+1))"
              class='lt-branch-Icon-Bg'
              :style="branchIconBgStyle"
              v-if="getIcon&&item.children&&item.children.length>0">
@@ -22,7 +25,7 @@
     <div :id="'lt-branch-animation_'+(branchLevel+(index+1))"
          :style="branchAnimationStyle(branchLevel+(index+1))">
       <!--=============== box ================= 每个branch下都有个box层，branch所有的下级分支都在box内，branch的展开和闭合就可以用box的显示隐藏来实现。另外box与左边框的距离可以实现上下级branch的缩进 -->
-      <div :id="'lt-branch-Box_'+(branchLevel+(index+1))"
+      <div :id="'lt-branch-box_'+(branchLevel+(index+1))"
           :style="branchBoxStyle(branchLevel+(index+1), item.children)">
         <branch :listData="item.children"
                 :treerouter="treerouter"
@@ -78,7 +81,7 @@ export default {
         return []
       }
     },
-    open: {// -------------------------------设置初始状态下各分支展开或闭合情况
+    open: {// --设置初始状态下各分支展开或闭合情况:0为全部闭合，1为全部展开；2第一个分支展开其他都闭合，且同级分支始终只能有一个展开；3除了一级分支展开，其他分支全都闭合；4除了一级分支展开，其他分支全都闭合，并且一级分支不能闭合，一级分支没有图标
       default: 1
     },
     indent: { // -----子级分支相对父级分支的缩进距离
@@ -99,7 +102,7 @@ export default {
     icon: {
       default: 1 // ------icon等于0时表示用户不需要图标，为大于0的整数时为系统自带的图标，为数组时为自定义图标（Font-Awesome和阿里巴巴图标）作为图标，数组第一个元素为展开时图标，第二个元素为闭合时图标，当数组内元素为图片地址时，也可以用自定义图片做图标
     },
-    animation: {
+    animation: { // ---animation设为false时不使用动画
       default: 1
     }
   },
@@ -212,7 +215,7 @@ export default {
       return iconClass
     },
     branchAnimationStyle (id) { // ----animation的样式
-      if (this.clickBranchIndex !== id) { // ------点击带有router属性的分支时，都会到祖先组件更新clickBranchIndex，祖先组件再把clickBranchIndex传给子组件，那么组件中的animation层就会立即闭合或展开，而动画由于是用setTimeout函数执行，它会在vue的下一帧才执行完，可那时候branch的状态已经发生改变，本来是执行展开动画的，可是动画还没执行就已经展开了，或者本来执行闭合动画的，动画还没执行branch就已经闭合了，所以这里禁止正在执行动画的branch改变状态（也就是this.clickBranchIndex不能等于当前id）
+      if (this.clickBranchIndex !== id || this.animation === false) { // ------点击带有router属性的分支时，都会到祖先组件更新clickBranchIndex，祖先组件再把clickBranchIndex传给子组件，那么组件中的animation层就会立即闭合或展开，而动画由于是用setTimeout函数执行，它会在vue的下一帧才执行完，可那时候branch的状态已经发生改变，本来是执行展开动画的，可是动画还没执行就已经展开了，或者本来执行闭合动画的，动画还没执行branch就已经闭合了，所以这里禁止正在执行动画的branch改变状态（也就是this.clickBranchIndex不能等于当前id）
         let theStyle = ''
         if (this.control['lt-branch_' + id][0] === 'open') {
           theStyle += this.animationOpenStyle
@@ -224,8 +227,7 @@ export default {
     },
     branchBoxStyle (id) { // -------------------------------------box的样式-----------------------
       // let elAnimation = document.getElementById('lt-branch-Animation_' + id)
-      // let elBox = document.getElementById('lt-branch-Box_' + id)
-      // console.log(elBox)
+      // let elBox = document.getElementById('lt-branch-box_' + id)
       // if (this.control['lt-branch_' + id][0] === 'open') { /* 页面加载的时候animation设置高度没有成功，这里补充设置 */
       //   elAnimation.style.height = `${elBox.offsetHeight}px`
       // } else {
@@ -252,7 +254,7 @@ export default {
           theIconId.className = this.branchIconClassName(id)
         }
         if (theAnimationId) {
-          if (this.animation === 0 || this.animation === false) {
+          if (this.animation === false) {
             theAnimationId.style.cssText = this.branchAnimationStyle(id)
           } else {
             this.doAnimation(id)
@@ -263,7 +265,7 @@ export default {
     doAnimation (id) { // --------------------------------展开收缩动画--------------------------------------------
       let elAnimation = document.getElementById('lt-branch-animation_' + id)
       elAnimation.style.display = 'block'
-      let elBox = document.getElementById('lt-branch-Box_' + id)
+      let elBox = document.getElementById('lt-branch-box_' + id)
       let boxH = elBox.offsetHeight
       let animationH = elAnimation.offsetHeight
       elAnimation.style.overflowY = 'hidden'
@@ -272,7 +274,6 @@ export default {
 
       let addHeight = 5 // -----每次增加或减小的高度
       if (this.control['lt-branch_' + id][0] === 'open') { // -----当前该id的状态open是点击branch后改的，改动后立即执行animation，说明原来是闭合的，现在要在animation里面通过动画的方式展开来
-        console.log(this.control['lt-branch_' + id] + ':' + animationH + '///' + boxH)
         elAnimation.style.height = (animationH + addHeight) + 'px'
         if (animationH > boxH || animationH === boxH) { // -------如果elAnimation的高大于elBox的高，把elAnimation的style设为animationOpenStyle，同时退出循环
           elAnimation.style.cssText = this.animationOpenStyle
@@ -281,20 +282,14 @@ export default {
         }
       } else {
         if (animationH < addHeight || animationH === addHeight) { // -------如果elAnimation的高小于等于addHeight，把elAnimation的style设为animationCloseStyle，同时退出循环
-          console.log(animationH + '????' + this.control['lt-branch_' + id])
           elAnimation.style.cssText = this.animationCloseStyle
           elBox.style.marginTop = ''
           return
         }
-        console.log(this.control['lt-branch_' + id] + ':' + animationH + '///' + boxH)
-        console.log(elAnimation.offsetHeight + '####')
         elAnimation.style.height = (animationH - 5) + 'px'
-        console.log(elAnimation.offsetHeight + '@@@@')
       }
 
-      console.log(elAnimation.offsetHeight + '///111111|||' + this.clickBranchIndex)
       setTimeout(() => {
-        console.log(elAnimation.offsetHeight + '///0000000000|||' + this.clickBranchIndex)
         this.doAnimation(id)
       }, this.animationTime)
     }
@@ -311,7 +306,6 @@ export default {
         if (icon === 0 || icon === false) return false // -----icon等于0或者false时不显示图标
         icon = IconFont['icon' + icon] // ----------把icon.json里的数据赋予icon
       }
-      console.log(this.icon)
       return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标
     },
     branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置，该图层的font-size可以控制图标尺寸
