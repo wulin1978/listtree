@@ -4,7 +4,6 @@
     <!-- ========= branch ===========树形结构中每个目录为一个独立的分支（branch），一级branch的index为X，二级branch的index为：X-X，三级branch的index为：X-X-X，以此类推 -->
     <!-- 层的编号（index）设计规则：一级分支用一个数字表示，二级用2个数字中间连一个“-”表示，三级分支用三个数字，每个数字中间连“-”……，比如：A-B-C-D-……，其中A表示所属一级分支编号，B表示所属二级分支编号，C表示所属三级分支编号……； -->
     <!-- id 前缀命名规则：branch的前缀为 lt-branch_ ，图标层的前缀为 lt-branch-icon_ ，图标基座的前缀为 lt-branch-icon-bg_ ，animation(动画)层前缀为：lt-branch-animation_，box层的前缀为 lt-branch-box_ 。层的 id 就是：前缀+编号 -->
-
     <a :href="item.router">
       <div :id="'lt-branch_'+(branchLevel+(index+1))"
           :data-index="branchLevel+(index+1)"
