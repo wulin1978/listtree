@@ -14,11 +14,11 @@
         <div :id="'lt-branch-icon-bg_'+(branchLevel+(index+1))"
              class='lt-branch-icon-Bg'
              :style="branchIconBgStyle"
-             v-if="getIcon&&item.children&&item.children.length>0">
+             v-if="(getIcon(branchLevel+(index+1))&&item.children&&item.children.length>0)||(item.icon!==undefined&&item.icon.length===2)">
           <span :id="'lt-branch-icon_'+(branchLevel+(index+1))"
                 :class='branchIconClassName(branchLevel+(index+1))'
                 :style="branchIconStyle(branchLevel+(index+1))"
-                v-if="control['lt-branch-icon_'+(branchLevel+(index+1))]==='show'"></span>
+                v-if="(control['lt-branch-icon_'+(branchLevel+(index+1))]==='show')||(item.icon!==undefined&&item.icon.length===2)"></span>
         </div>{{item.name}}</div>
     </a>
     <!--=============== animation ================= 每个branch下都有个animation层，是用来实现伸缩动画的 -->
@@ -160,31 +160,90 @@ export default {
       }
       return branchClass
     },
-    branchIconStyle (id) { // ---------------------------------图标的样式-------------------------
+    getIcon (index) { // ---------图标来源（权重：listData > 参数icon > icon.json）
+      /* 从listData读取icon */
+      let arr = index.toString().split('-')
+      let privateIcon = this.listData[arr[arr.length - 1] - 1].icon
+      if (privateIcon !== undefined && privateIcon.length === 2) {
+        console.log(index)
+        return privateIcon
+      }
+      /* 从用户输入的参数icon 和 icon.json（默认）读取icon */
+      let icon = this.icon
+      if (icon === '' || icon === 'undefined') icon = 1
+      if (!isNaN(parseInt(icon))) {
+        if (icon === 0 || icon === false) return false // -----icon等于0或者false时不显示图标
+        icon = IconFont['icon' + icon] // ----------把icon.json里的数据赋予icon
+      }
+      return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标或者在listData中定义图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标（数组元素可能是图片地址，也可能是代表第三方图标的className）
+    },
+    iconOpenStyle (index) { // -----图标展开时的样式
+      if (this.getIcon(index)[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
+        return `position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                background: url('${this.getIcon(index)[0]}') center no-repeat;`
+      } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
+        return `position: absolute;
+                top: 50%;
+                transform: translateY(-50%);`
+      }
+    },
+    iconCloseStyle (index) { // -----图标闭合时的样式
+      if (this.getIcon(index)[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
+        return `position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                background: url('${this.getIcon(index)[1]}') center no-repeat;`
+      } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
+        return `position: absolute;
+                top: 50%;
+                transform: translateY(-50%);`
+      }
+    },
+    iconOpenClassName (index) { // ----------展开时图标层的className
+      if (!this.getIcon(index)) return ''
+      if (this.getIcon(index)[0].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
+        return this.getIcon(index)[0]
+      }
+      return ''
+    },
+    iconCloseClassName (index) { // ----------闭合时图标层的className
+      if (!this.getIcon(index)) return ''
+      if (this.getIcon(index)[1].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
+        return this.getIcon(index)[1]
+      }
+      return ''
+    },
+    branchIconStyle (index) { // ---------------------------------图标的样式-------------------------
       if (this.icon === 0) return ''
       let iconStyle
-      if (this.control['lt-branch_' + id][0] === 'open') { // ----------分支展开或闭合的情况
-        iconStyle = this.iconOpenStyle
+      if (this.control['lt-branch_' + index][0] === 'open') { // ----------分支展开或闭合的情况
+        iconStyle = this.iconOpenStyle(index)
       } else {
-        iconStyle = this.iconCloseStyle
+        iconStyle = this.iconCloseStyle(index)
       }
       return iconStyle
     },
-    branchIconClassName (id) { // ---------------图标的className(当使用默认图标或第三方图标库时需要设定className)-------------------
+    branchIconClassName (index) { // ---------------图标的className(当使用默认图标或第三方图标库时需要设定className)-------------------
       let iconClass = ''
-      if (this.control['lt-branch_' + id][0] === 'open') {
-        iconClass += this.iconOpenClassName
+      if (this.control['lt-branch_' + index][0] === 'open') {
+        iconClass += this.iconOpenClassName(index)
       } else {
-        iconClass += this.iconCloseClassName
+        iconClass += this.iconCloseClassName(index)
       }
 
       iconClass += ' lt-branch-icon lt-branch-icon_level_' + (this.depth + 1) // --------添加常规分支图标className和当前级别图标的className
-      let theId = id.toString()
+      let theId = index.toString()
       let theChildren = ''
       let theData = ''
 
       if (this.depth === 0) { // --获取branch的children值，如果该branch没有children(即没有子分支)，就给它加上lt-branch_level_0样式
-        theData = this.listData[id - 1]
+        theData = this.listData[index - 1]
         if (theData.children) theChildren = theData.children
       } else {
         theData = this.listData[theId.replace(this.branchLevel, '') - 1]
@@ -287,61 +346,9 @@ export default {
       if (this.icon === false) return false
       return true
     },
-    getIcon () { // ---------图标来源，用户设置完来源后全部在这里集成
-      let icon = this.icon
-      if (icon === '' || icon === 'undefined') icon = 1
-      if (!isNaN(parseInt(icon))) {
-        if (icon === 0 || icon === false) return false // -----icon等于0或者false时不显示图标
-        icon = IconFont['icon' + icon] // ----------把icon.json里的数据赋予icon
-      }
-      return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标
-    },
     branchIconBgStyle () { // ----图标背景层距离左边的距离，控制图标的位置
-      console.log(this.indent)
       if (!this.iconIsTrue) return ''
       return `left: ${this.indent * this.depth}px;`
-    },
-    iconOpenStyle () { // -----图标展开时的样式
-      if (this.getIcon[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
-        return `position: absolute;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                right: 0;
-                background: url('${this.getIcon[0]}') center no-repeat;`
-      } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
-        return `position: absolute;
-                top: 50%;
-                transform: translateY(-50%);`
-      }
-    },
-    iconCloseStyle () { // -----图标闭合时的样式
-      if (this.getIcon[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
-        return `position: absolute;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                right: 0;
-                background: url('${this.getIcon[1]}') center no-repeat;`
-      } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
-        return `position: absolute;
-                top: 50%;
-                transform: translateY(-50%);`
-      }
-    },
-    iconOpenClassName () { // ----------展开时图标层的className
-      if (!this.getIcon) return ''
-      if (this.getIcon[0].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
-        return this.getIcon[0]
-      }
-      return ''
-    },
-    iconCloseClassName () { // ----------闭合时图标层的className
-      if (!this.getIcon) return ''
-      if (this.getIcon[1].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
-        return this.getIcon[1]
-      }
-      return ''
     },
     branchOpenStyle () { // ---branch展开时的样式
       return `padding-left: ${this.indent * this.depth + 20}px;`
