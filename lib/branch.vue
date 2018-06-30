@@ -84,7 +84,7 @@ export default {
       default: 24
     },
     icon: {
-      default: 1 // ------icon等于0时表示用户不需要图标，为大于0的整数时为系统自带的图标，为数组时为自定义图标（Font-Awesome和阿里巴巴图标）作为图标，数组第一个元素为展开时图标，第二个元素为闭合时图标，当数组内元素为图片地址时，也可以用自定义图片做图标
+      default: 1 // ------icon等于0时表示用户不需要图标，为大于0的整数时为系统自带的图标，为数组时为自定义图标（Font-Awesome和阿里巴巴图标）作为图标，数组第一个元素为闭合时图标，第二个元素为展开时图标或者是闭合图标需要旋转的角度，当数组内元素为图片地址时，也可以用自定义图片做图标
     },
     animation: { // ---animation设为false时不使用动画
       default: 1
@@ -160,12 +160,11 @@ export default {
       }
       return branchClass
     },
-    getIcon (index) { // ---------图标来源（权重：listData > 参数icon > icon.json）
+    getIcon (index) { // ---------图标来源（权重：listData > 参数icon > icon.json。如果一个branch没有子级，那么这个branch没有图标，但如果listData中该branch包含icon属性，那么这个branch哪怕没有子级它也有自己的图标）
       /* 从listData读取icon */
       let arr = index.toString().split('-')
       let privateIcon = this.listData[arr[arr.length - 1] - 1].icon
       if (privateIcon !== undefined && privateIcon.length === 2) {
-        console.log(index)
         return privateIcon
       }
       /* 从用户输入的参数icon 和 icon.json（默认）读取icon */
@@ -175,9 +174,10 @@ export default {
         if (icon === 0 || icon === false) return false // -----icon等于0或者false时不显示图标
         icon = IconFont['icon' + icon] // ----------把icon.json里的数据赋予icon
       }
+
       return icon // -----不管用户是使用系统默认图标、自定义图片还是使用第三方图标或者在listData中定义图标，icon都为数组，数组第一个元素为展开时的图标，第二个元素为闭合时图标（数组元素可能是图片地址，也可能是代表第三方图标的className）
     },
-    iconOpenStyle (index) { // -----图标展开时的样式
+    iconCloseStyle (index) { // -----图标闭合时的样式
       if (this.getIcon(index)[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
         return `position: absolute;
                 top: 0;
@@ -191,41 +191,59 @@ export default {
                 transform: translateY(-50%);`
       }
     },
-    iconCloseStyle (index) { // -----图标闭合时的样式
-      if (this.getIcon(index)[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
-        return `position: absolute;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                right: 0;
-                background: url('${this.getIcon(index)[1]}') center no-repeat;`
-      } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
-        return `position: absolute;
-                top: 50%;
-                transform: translateY(-50%);`
+    iconOpenStyle (index) { // -----图标展开时的样式
+      if (isNaN(parseInt(this.getIcon(index)[1]))) { // ---如果this.getIcon(index)第二个元素不是纯数字，它一定是与第一个元素代表完全不一样的图片或className。
+        if (this.getIcon(index)[0].indexOf('/') > -1) { // -----------this.getIcon中的元素包含“/”说明用户使用自定义图片作为图标
+          return `position: absolute;
+                  top: 0;
+                  left: 0;
+                  bottom: 0;
+                  right: 0;
+                  background: url('${this.getIcon(index)[1]}') center no-repeat;`
+        } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
+          return `position: absolute;
+                  top: 50%;
+                  transform: translateY(-50%);`
+        }
+      } else { // ---如果this.getIcon(index)第二个元素是纯数字，它表示与第一个元素是一样的图片或className，只是需要顺时针旋转一个角度。
+        let transform
+        if (this.getIcon(index)[0].indexOf('/') > -1) { // ----如果是图片不需要上移
+          transform = `transform: rotate(${this.getIcon(index)[1]}deg);`
+        } else {
+          transform = `transform: translateY(-50%) rotate(${this.getIcon(index)[1]}deg);`
+        }
+        return `${this.iconCloseStyle(index)}
+                ${transform}`
       }
     },
-    iconOpenClassName (index) { // ----------展开时图标层的className
+    iconCloseClassName (index) { // ----------闭合时图标层的className
       if (!this.getIcon(index)) return ''
-      if (this.getIcon(index)[0].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
+      if (this.getIcon(index)[0].indexOf('/') === -1) { // ---如果图标使用的不是图片（图片地址一定含有“/”）
         return this.getIcon(index)[0]
       }
       return ''
     },
-    iconCloseClassName (index) { // ----------闭合时图标层的className
+    iconOpenClassName (index) { // ----------展开时图标层的className
       if (!this.getIcon(index)) return ''
-      if (this.getIcon(index)[1].indexOf('/') === -1) { // ---如果图标是使用默认图标或第三方图标
+      if (isNaN(parseInt(this.getIcon(index)[1])) && this.getIcon(index)[1].toString().indexOf('/') === -1) { // ---如果this.getIcon(index)第二个元素不是纯数字并且图标使用的不是图片（图片地址一定含有“/”）
         return this.getIcon(index)[1]
+      } else if (!isNaN(parseInt(this.getIcon(index)[1]))) { // ---this.getIcon(index)第二个元素是纯数字，展开时图标层的className和闭合时图标层的className应该一样，只是在设置style时旋转一定的角度就可以了（角度的度数是this.getIcon(index)）
+        return this.getIcon(index)[0]
       }
       return ''
     },
     branchIconStyle (index) { // ---------------------------------图标的样式-------------------------
       if (this.icon === 0) return ''
+      let elIndex = document.getElementById('lt-branch-icon_' + index)
       let iconStyle
-      if (this.control['lt-branch_' + index][0] === 'open') { // ----------分支展开或闭合的情况
-        iconStyle = this.iconOpenStyle(index)
-      } else {
-        iconStyle = this.iconCloseStyle(index)
+      if (elIndex) iconStyle = elIndex.style.cssText
+      if (this.clickBranchIndex !== index || this.animation === false) { // ----禁止当前正处于动画状态的图标改变状态
+        console.log('object')
+        if (this.control['lt-branch_' + index][0] === 'open') { // ----------分支展开或闭合的情况
+          iconStyle = this.iconOpenStyle(index)
+        } else {
+          iconStyle = this.iconCloseStyle(index)
+        }
       }
       return iconStyle
     },
@@ -297,8 +315,12 @@ export default {
           theBranchId.className = this.branchClassName(id)
         }
         if (theIconId) {
-          theIconId.style.cssText = this.branchIconStyle(id)
-          theIconId.className = this.branchIconClassName(id)
+          if (this.animation === false || isNaN(parseInt(this.getIcon(id)[1]))) { // ---this.getIcon第二个元素不是纯数字说明它和第一个元素是完全不同的图标，此时不用动画
+            theIconId.style.cssText = this.branchIconStyle(id)
+            theIconId.className = this.branchIconClassName(id)
+          } else { // -----如果this.getIcon第二个元素是纯数字，那它只需要将第一个元素所代表的图标旋转一个角度就可以，此时才用的上旋转动画
+            this.doRotate(id)
+          }
         }
         if (theAnimationId) {
           if (this.animation === false) {
@@ -338,6 +360,38 @@ export default {
 
       setTimeout(() => {
         this.doAnimation(id)
+      }, this.animationTime)
+    },
+    doRotate (index) { // --------------------------------图标旋转动画--------------------------------------------
+      let elIcon = document.getElementById('lt-branch-icon_' + index)
+      let transformIcon = elIcon.style.transform
+      let translateY = ''
+      let angle = 0
+      if (transformIcon.indexOf('translateY(-50%)') > -1) translateY = 'translateY(-50%)'
+      if (transformIcon.indexOf('rotate') > -1) {
+        angle = parseInt(transformIcon.split('rotate(')[1].split('deg)')[0])
+      }
+
+      let rotateAngle = 5 // -----图标每次旋转的角度
+      let maxAngle = parseInt(this.getIcon(index)[1]) // -----图标旋转所能达到的最大角度，即闭合的时候图标需要旋转的角度
+      console.log(elIcon.style.cssText)
+
+      if (this.control['lt-branch_' + index][0] === 'open') { // -----当前该branch的状态open是点击branch后改的，改动后立即执行动画，说明原来是闭合的，现在要通过动画的方式展开来
+        elIcon.style.transform = `${translateY} rotate(${angle + rotateAngle}deg)`
+        if (parseInt(angle + rotateAngle) > maxAngle || parseInt(angle + rotateAngle) === maxAngle) { // -------如果elIcon旋转的角度大于等于maxAngle，把elIcon旋转的角度设为maxAngle，同时退出循环
+          elIcon.style.transform = `${translateY} rotate(${maxAngle}deg)`
+          return
+        }
+      } else {
+        elIcon.style.transform = `${translateY} rotate(${angle - rotateAngle}deg)`
+        if (parseInt(angle - rotateAngle) < 0 || parseInt(angle - rotateAngle) === 0) { // -------如果elIcon旋转的角度小于等于0，把elIcon旋转的角度设为0，同时退出循环（elIcon旋转的角度为0的时候即会到展开时图标的初始状态）
+          elIcon.style.transform = `${translateY} rotate(0deg)`
+          return
+        }
+      }
+
+      setTimeout(() => {
+        this.doRotate(index)
       }, this.animationTime)
     }
   },

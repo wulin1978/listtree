@@ -3,6 +3,7 @@
     <branch :listData="listData"
             :treerouter="treerouter"
             :open="open"
+            :indent="indent"
             :icon="icon"
             :animation="animation"
             :clickBranchIndex="clickBranchIndex"
