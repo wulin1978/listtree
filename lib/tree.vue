@@ -4,7 +4,9 @@
             :treerouter="treerouter"
             :open="open"
             :indent="indent"
+            :spacing="spacing"
             :icon="icon"
+            :iconSize="iconSize"
             :animation="animation"
             :clickBranchIndex="clickBranchIndex"
             @getClickBranchIndex="getIndex"></branch>
@@ -23,7 +25,7 @@ export default {
       clickBranchIndex: '' // -----------被点击的分支index，当用户点击branch时赋值
     }
   },
-  props: ['treerouter', 'listData', 'open', 'indent', 'icon', 'animation'],
+  props: ['treerouter', 'listData', 'open', 'indent', 'spacing', 'icon', 'iconSize', 'animation'],
   methods: {
     getIndex (index) {
       this.clickBranchIndex = index

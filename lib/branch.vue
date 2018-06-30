@@ -31,7 +31,9 @@
                 :treerouter="treerouter"
                 :open="open"
                 :indent="indent"
+                :spacing="spacing"
                 :icon="icon"
+                :iconSize="iconSize"
                 :animation="animation"
                 :clickBranchIndex="clickBranchIndex"
                 @getClickBranchIndex="getIndex"
@@ -83,8 +85,14 @@ export default {
     indent: { // -----子级分支相对父级分支的缩进距离
       default: 24
     },
+    spacing: { // ---------图标与文字之间的距离
+      default: 20
+    },
     icon: {
       default: 1 // ------icon等于0时表示用户不需要图标，为大于0的整数时为系统自带的图标，为数组时为自定义图标（Font-Awesome和阿里巴巴图标）作为图标，数组第一个元素为闭合时图标，第二个元素为展开时图标或者是闭合图标需要旋转的角度，当数组内元素为图片地址时，也可以用自定义图片做图标
+    },
+    iconSize: { // -----设置图标大小
+      default: 25
     },
     animation: { // ---animation设为false时不使用动画
       default: 1
@@ -184,9 +192,11 @@ export default {
                 left: 0;
                 bottom: 0;
                 right: 0;
+                font-size:${this.iconSize}px;
                 background: url('${this.getIcon(index)[0]}') center no-repeat;`
       } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
         return `position: absolute;
+                font-size:${this.iconSize}px;
                 top: 50%;
                 transform: translateY(-50%);`
       }
@@ -199,9 +209,11 @@ export default {
                   left: 0;
                   bottom: 0;
                   right: 0;
+                  font-size: ${this.iconSize}px;
                   background: url('${this.getIcon(index)[1]}') center no-repeat;`
         } else { // ---------------------------------------------此时用户使用默认图标或第三方图标库来作为图标
           return `position: absolute;
+                  font-size:${this.iconSize}px;
                   top: 50%;
                   transform: translateY(-50%);`
         }
@@ -238,7 +250,6 @@ export default {
       let iconStyle
       if (elIndex) iconStyle = elIndex.style.cssText
       if (this.clickBranchIndex !== index || this.animation === false) { // ----禁止当前正处于动画状态的图标改变状态
-        console.log('object')
         if (this.control['lt-branch_' + index][0] === 'open') { // ----------分支展开或闭合的情况
           iconStyle = this.iconOpenStyle(index)
         } else {
@@ -374,7 +385,6 @@ export default {
 
       let rotateAngle = 5 // -----图标每次旋转的角度
       let maxAngle = parseInt(this.getIcon(index)[1]) // -----图标旋转所能达到的最大角度，即闭合的时候图标需要旋转的角度
-      console.log(elIcon.style.cssText)
 
       if (this.control['lt-branch_' + index][0] === 'open') { // -----当前该branch的状态open是点击branch后改的，改动后立即执行动画，说明原来是闭合的，现在要通过动画的方式展开来
         elIcon.style.transform = `${translateY} rotate(${angle + rotateAngle}deg)`
@@ -405,10 +415,10 @@ export default {
       return `left: ${this.indent * this.depth}px;`
     },
     branchOpenStyle () { // ---branch展开时的样式
-      return `padding-left: ${this.indent * this.depth + 20}px;`
+      return `padding-left: ${this.indent * this.depth + this.spacing + 20}px;`
     },
     branchCloseStyle () { // ---branch闭合时的样式
-      return `padding-left: ${this.indent * this.depth + 20}px;`
+      return `padding-left: ${this.indent * this.depth + this.spacing + 20}px;`
     },
     animationOpenStyle () {
       return `margin:0px;
@@ -460,7 +470,6 @@ export default {
     font-family:"iconfont" !important;
     font-style:normal;
     font-weight: normal;
-    font-size:20px;
     -webkit-font-smoothing: antialiased;
     -webkit-text-stroke-width: 0.2px;
     -moz-osx-font-smoothing: grayscale;
