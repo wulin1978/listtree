@@ -1,6 +1,6 @@
 # v-listtree —— vue无限级菜单
 
-v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部分纵列多级别菜单的需求，并且用户定义菜单样式的自由度非常高，具体到每一级别的菜单甚至每一个菜单分支的单独样式都可以自由定义，和自己写css样式没有任何区别。菜单前的小图标可以使用系统默认的图标，也可以使用阿里巴巴图标库和Font Awesome图标库里的图标，当然你也可以使用自己设计的图标。你可以自由控制图标的尺寸、颜色以及图标和文字之间的间距。
+v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部分纵列多级别菜单的需求，并且用户定义菜单样式的自由度非常高，具体到每一级别的菜单甚至每一个菜单分支的单独样式都可以自由定义，和自己写css样式没有任何区别。菜单前的小图标可以使用系统默认的图标，也可以使用阿里巴巴图标库和Font Awesome图标库里的图标，当然你也可以使用自己设计的png、icon等格式的图标。
 
 ## 安装
 
@@ -32,17 +32,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
         "children": [
           {
             "name": "二级目录一",
-            "children": [
-              {
-                "name": "三级目录一",
-                "router": "/rel"
-              },
-              {
-                "name": "三级目录二",
-                "router": "/rwr",
-                "children": []
-              }
-            ]
+            "router": "/erji"
           }
         ]
       },
@@ -51,40 +41,17 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
         "children": [
           {
             "name": "二级目录二",
+            "icon": ["iconfont icon-yousanjiao", "iconfont icon-sanjiao3"]
             "router": "/po"
           },
           {
             "name": "二级目录三",
-            "router": "/pl",
-            "children": [
-              {
-                "name": "三级目录X",
-                "router": "/sel"
-              }
-            ]
-          },
-          {
-            "name": "二级目录四",
-            "children": [
-              {
-                "name": "三级目录Y",
-                "router": "/lew",
-                "icon": ["iconfont icon-jiantou12", 45]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "一级目录三",
-        "router": "/ire",
-        "children": [
-          {
-            "name": "二级目录五",
-            "router": "/jk"
+            "router": "/pl"
           }
         ]
       }
     ]
 
-> 从上面代码我们可以看到每一个菜单分支可能拥有四个属性：name,router,icon,children。name是菜单的文字内容，这个属性是必须；router是菜单所指向的路由地址；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说；children好理解就是子分支。
+> 从上面代码我们可以看到每一个菜单分支可以拥有四个属性：name,router,icon,children。name是菜单的文字内容，这个属性是必须的；router是菜单所指向的路由地址；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说；children好理解就是子分支。下面截图是 v-listtree 的一个典型例子：
+
+<img src="https://github.com/wulin1978/vuetest/blob/master/static/lizi.png?raw=true">
