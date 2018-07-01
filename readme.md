@@ -29,7 +29,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 > v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求
 
-### 1、listdata 数组 必选
+### 1、listdata [数组 必选]
 
 > listdata 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单的路由地址（router），菜单的图标（icon）以及子级菜单（children）。类似于下面这段代码：
 
@@ -64,9 +64,34 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/lizi.png?raw=true">
 
 
-### 2、open
+### 2、open [number 1 可选]
 
-> 多级菜单是可以展开闭合的，v-listtree 中，open 决定了菜单初始状态的展开闭合状态，它是 number 数据类型的，当 open 为 0 时所有菜单默认均为闭合状态；当 open 为 1 时所有菜单默认均为展开状态；当 open 为 2 时第一个一级菜单为展开状态，其他所有菜单默认均为闭合状态，并且所有同级分支同一时间只能展开一个分支；当 open 为 3 时，所有一级菜单均为展开状态，其他菜单都闭合；当 open 为 4 时，所有一级菜单均为展开状态，其他菜单都闭合，并且一级菜单不能被闭合，一级菜单前面也没有图标。open 的默认值为 1。
+<table style="border:1px solid #222">
+  <tr style="background:#ccc">
+    <td>open的值</td>
+    <td>描述</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>在初始状态下所有菜单均为闭合状态</td>
+  </tr>
+  <tr>
+    <td>1（默认值）</td>
+    <td>在初始状态下所有菜单均为展开状态</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>在初始状态下第一个一级菜单为展开状态，其他所有菜单均为闭合状态，且所有同级菜单在同一时间只能有一个分支展开</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态，且一级菜单不能被闭合，一级菜单没有图标（但listdata中对应的一级菜单如果包含icon属性的话该一级菜单仍然有图标）</td>
+  </tr>
+</table>
 
 ### 3、indent
 
