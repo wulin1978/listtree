@@ -68,27 +68,27 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 <table style="border:1px solid #222">
   <tr style="background:#ccc">
-    <td>open的值</td>
+    <td style="width:50px">open的值</td>
     <td>描述</td>
   </tr>
   <tr>
-    <td>0</td>
+    <td style="width:50px">0</td>
     <td>在初始状态下所有菜单均为闭合状态</td>
   </tr>
   <tr>
-    <td>1（默认值）</td>
+    <td style="width:50px">1（默认值）</td>
     <td>在初始状态下所有菜单均为展开状态</td>
   </tr>
   <tr>
-    <td>2</td>
+    <td style="width:50px">2</td>
     <td>在初始状态下第一个一级菜单为展开状态，其他所有菜单均为闭合状态，且所有同级菜单在同一时间只能有一个分支展开</td>
   </tr>
   <tr>
-    <td>3</td>
+    <td style="width:50px">3</td>
     <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态</td>
   </tr>
   <tr>
-    <td>4</td>
+    <td style="width:50px">4</td>
     <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态，且一级菜单不能被闭合，一级菜单没有图标（但listdata中对应的一级菜单如果包含icon属性的话该一级菜单仍然有图标）</td>
   </tr>
 </table>
