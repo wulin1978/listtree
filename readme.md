@@ -55,3 +55,15 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 > 从上面代码我们可以看到每一个菜单分支可以拥有四个属性：name,router,icon,children。name是菜单的文字内容，这个属性是必须的；router是菜单所指向的路由地址；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说；children好理解就是子分支。下面截图是 v-listtree 的一个典型例子：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/lizi.png?raw=true">
+
+## 参数
+
+> v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求
+
+### 1、listdata
+
+> listdata其实是 v-listtree 的数据，它是json格式的，listdata参数是必不可少的，上面已经做过介绍就不累述了。
+
+### 2、open
+
+> 多级菜单是可以展开闭合的，v-listtree 中，open 决定了菜单初始状态的展开闭合状态，它是 number 数据类型的，当 open 为 0 时所有菜单默认均为闭合状态；当 open 为 1 时所有菜单默认均为展开状态；当 open 为 2 时第一个一级菜单为展开状态，其他所有菜单默认均为闭合状态，并且所有同级分支同一时间只能展开一个分支；当 open 为 3 时，所有一级菜单均为展开状态，其他菜单都闭合；当 open 为 4 时，所有一级菜单均为展开状态，其他菜单都闭合，并且一级菜单不能被闭合，一级菜单前面也没有图标。
