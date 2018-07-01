@@ -10,81 +10,81 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 > 在 main.js 中插入下列代码：
 
-  import Listtree from './plugin/listtree/lib'
+    import Listtree from './plugin/listtree/lib'
 
-  Vue.use(Listtree, {
-    listData: require('../static/listdata.json'),
-  })
-  Vue.prototype.$push = function (r) {
-    router.push(r)
-  }
+    Vue.use(Listtree, {
+      listData: require('../static/listdata.json'),
+    })
+    Vue.prototype.$push = function (r) {
+      router.push(r)
+    }
 
 > 然后在需要插入菜单的组件插入下面代码：
 
-  <div class="listtree"></div>
+    <div class="listtree"></div>
 
 
 > 其中listdata.json是菜单的数据内容，它应当类似于下面这段代码：
 
-  [
-    {
-      "name": "一级目录一",
-      "children": [
-        {
-          "name": "二级目录一",
-          "children": [
-            {
-              "name": "三级目录一",
-              "router": "/rel"
-            },
-            {
-              "name": "三级目录二",
-              "router": "/rwr",
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "一级目录二",
-      "children": [
-        {
-          "name": "二级目录二",
-          "router": "/po"
-        },
-        {
-          "name": "二级目录三",
-          "router": "/pl",
-          "children": [
-            {
-              "name": "三级目录X",
-              "router": "/sel"
-            }
-          ]
-        },
-        {
-          "name": "二级目录四",
-          "children": [
-            {
-              "name": "三级目录Y",
-              "router": "/lew",
-              "icon": ["iconfont icon-jiantou12", 45]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "一级目录三",
-      "router": "/ire",
-      "children": [
-        {
-          "name": "二级目录五",
-          "router": "/jk"
-        }
-      ]
-    }
-  ]
+    [
+      {
+        "name": "一级目录一",
+        "children": [
+          {
+            "name": "二级目录一",
+            "children": [
+              {
+                "name": "三级目录一",
+                "router": "/rel"
+              },
+              {
+                "name": "三级目录二",
+                "router": "/rwr",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "一级目录二",
+        "children": [
+          {
+            "name": "二级目录二",
+            "router": "/po"
+          },
+          {
+            "name": "二级目录三",
+            "router": "/pl",
+            "children": [
+              {
+                "name": "三级目录X",
+                "router": "/sel"
+              }
+            ]
+          },
+          {
+            "name": "二级目录四",
+            "children": [
+              {
+                "name": "三级目录Y",
+                "router": "/lew",
+                "icon": ["iconfont icon-jiantou12", 45]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "一级目录三",
+        "router": "/ire",
+        "children": [
+          {
+            "name": "二级目录五",
+            "router": "/jk"
+          }
+        ]
+      }
+    ]
 
 > 从上面代码我们可以看到每一个菜单分支可能拥有四个属性：name,router,icon,children。name是菜单的文字内容，这个属性是必须；router是菜单所指向的路由地址；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说；children好理解就是子分支。
