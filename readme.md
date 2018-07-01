@@ -4,7 +4,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 ## 安装
 
-        npm install v-listtree -S
+    npm install v-listtree -S
 
 ## 使用
 
@@ -24,7 +24,15 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
     <div class="listtree"></div>
 
 
-> 其中listdata.json是菜单的数据内容，它应当类似于下面这段代码：
+> 其中listdata.json是菜单的数据内容，下面讲参数时会具体说明。
+## 参数
+
+> v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求
+
+### 1、listdata
+
+> __数据类型：__ 数组
+> __详细说明：__ listdata 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单的路由地址（router），菜单的图标（icon）以及子级菜单（children）。类似于下面这段代码：
 
     [
       {
@@ -52,17 +60,10 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
       }
     ]
 
-> 从上面代码我们可以看到每一个菜单分支可以拥有四个属性：name,router,icon,children。name是菜单的文字内容，这个属性是必须的；router是菜单所指向的路由地址；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说；children好理解就是子分支。下面截图是 v-listtree 的一个典型例子：
+> 菜单分支四个属性：name,router,icon,children。name是菜单的文字内容，是必选的；router是菜单所指向的路由地址，可选；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说，可选；children好理解就是子分支，可选。下面截图是 v-listtree 的一个典型例子：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/lizi.png?raw=true">
 
-## 参数
-
-> v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求
-
-### 1、listdata
-
-> listdata其实是 v-listtree 的数据，它是json格式的，listdata参数是必不可少的，上面已经做过介绍就不累述了。
 
 ### 2、open
 
