@@ -28,7 +28,6 @@
       <div :id="'lt-branch-box_'+(branchLevel+(index+1))"
           :style="branchBoxStyle(branchLevel+(index+1), item.children)">
         <branch :listData="item.children"
-                :treerouter="treerouter"
                 :open="open"
                 :indent="indent"
                 :spacing="spacing"
@@ -68,11 +67,6 @@ export default {
       default: 0
     },
     clickBranchIndex: '', // -----------被点击的分支index，用户在分支上点击（处于组件branch.vue中）后会触发getClickBranchIndex事件，上一级组件（上一级branch.vue）监听到getClickBranchIndex后再运行getIndex事件，getIndex事件里又触发getClickBranchIndex事件往上传递，一直到组件tree.vue监听到getClickBranchIndex事件后更改data中的clickBranchIndex，tree.vue下所有的组件都会接受到clickBranchIndex的更改
-    treerouter: { // ------------------------路由信息
-      default: function () {
-        return {}
-      }
-    },
     // -------------------------------------------以上props内容用户不能控制，以下props用户可以设置-------------------------------
     listData: { // -----------json格式的数据，每个分支目录有name,router,icon,children四个个字段，name为分支的文字内容（必须有）。router为点击分支时跳转的路由地址,如果不跳转可省略router字段。icon为该分支前的图标地址（包括展开时和闭合时的图标，所以icon是个数组），如果使用默认图标icon字段可以省略。children为该分支的下级分支，如果没有下级分支children字段也可以省略
       default: function () {
@@ -118,7 +112,8 @@ export default {
       if (this.depth === 0 && this.open === 4) this.control['lt-branch_' + id][0] = 'open' // ---open为4的时候，一级分支总是处于展开状态
 
       if (router) {
-        this.treerouter.push(router)
+        // this.treerouter.push(router)
+        this.$push(router)
         this.$emit('getClickBranchIndex', id)
       }
       this.renewStyle([id])
