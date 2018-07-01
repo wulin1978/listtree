@@ -29,10 +29,9 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 > v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求
 
-### 1、listdata
+### 1、listdata 数组 必选
 
-> __数据类型：__ 数组
-> __详细说明：__ listdata 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单的路由地址（router），菜单的图标（icon）以及子级菜单（children）。类似于下面这段代码：
+> listdata 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单的路由地址（router），菜单的图标（icon）以及子级菜单（children）。类似于下面这段代码：
 
     [
       {
