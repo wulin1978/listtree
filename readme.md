@@ -107,7 +107,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 >icon 为数字时比较简单也好理解，下面我们举例详细说明下 icon 为数组时的各种情况(这里我们假设你要使用 v-listtree 插件的组件是 mytree.vue)。
 
-**1、使用阿里巴巴图标库图标** 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在打开<a href="http://www.iconfont.cn/" target="_blank">阿里巴巴图标库</a>进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
+**a 使用阿里巴巴图标库图标** 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在打开<a href="http://www.iconfont.cn/" target="_blank">阿里巴巴图标库</a>进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/iconfont1.png?raw=true">
 
@@ -138,7 +138,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 当然上面代码中icon你也可以替换成：icon: ['iconfont xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
-**2、使用Font Awesome图标库** 打开<a href="http://www.fontawesome.com.cn/" target="_blank">Font Awesome网站</a>并下载最新版Font Awesome，将Font Awesome解压到mytree.vue同一个文件夹，mytree.vue 代码如下：
+**b 使用Font Awesome图标库** 打开<a href="http://www.fontawesome.com.cn/" target="_blank">Font Awesome网站</a>并下载最新版Font Awesome，将Font Awesome解压到mytree.vue同一个文件夹，mytree.vue 代码如下：
 
     <template>
       <div class="hello">
@@ -165,7 +165,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 上面代码中icon也可以替换成：icon: ['fa xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
-**3、使用png、icon等格式图片作为图标** 建议将图片存放在static文件夹里，mytree.vue 代码如下：
+**c 使用png、icon等格式图片作为图标** 建议将图片存放在static文件夹里，mytree.vue 代码如下：
 
     <template>
       <div class="hello">
@@ -190,3 +190,5 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
     }
 
 上面代码中icon也可以替换成：icon: ['../static/xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 ../static/xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
+
+> 如果你不想在自己的菜单里加任何的图标，可以将icon设为0就可以了。在icon里面设置的图标是单一的，也就是说所有的菜单分支图标都是一样的，如果你想要将某一个分支单独设置一个图标或者干脆让每个分支图标都不一样该怎么办呢，还记得前面提到过的 listtree 参数吗，listtree 元素里面有个icon属性，每个listtree 元素就代表一个菜单分支，设置某一分支的icon属性，该分支就拥有一个独立的图标。listtree 里面的icon数据类型是数组，同样该数组第一个元素代表的是菜单闭合时的图标，第二个元素如果是字符串代表的就是菜单展开时的图标，如果是数字代表的就是图标旋转的角度，此时菜单展开时的图标和闭合时的图标是一样的。listtree 元素里面有个icon属性和参数 icon 使用方法上都一样，它也可以使用阿里巴巴图标库、Font Awesome图标库和png、icon等格式图片作为图标。
