@@ -165,7 +165,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 上面代码中icon也可以替换成：icon: ['fa xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
-**c 使用png、icon等格式图片作为图标** 建议将图片存放在static文件夹里，mytree.vue 代码如下：
+**c 使用png、icon等图片格式作为图标** 建议将图片存放在static文件夹里，mytree.vue 代码如下：
 
     <template>
       <div class="hello">
