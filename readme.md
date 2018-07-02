@@ -107,86 +107,86 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 >icon 为数字时比较简单也好理解，下面我们举例详细说明下 icon 为数组时的各种情况(这里我们假设你要使用 v-listtree 插件的组件是 mytree.vue)。
 
-**1、使用阿里巴巴图标库图标** 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在打开[阿里巴巴图标库](http://www.iconfont.cn/)进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
+**1、使用阿里巴巴图标库图标** 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在打开<a href="http://www.iconfont.cn/" target="_blank">阿里巴巴图标库</a>进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/iconfont1.png?raw=true">
 
 mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴图标库的css文件)：
 
-    `<template>
-      <div class="hello">
-        <div class="listtree"></div>
-      </div>
-    </template>
-    <script>
-    </script>
-    <style>
-    @import url("./xxxxxxxx/iconfont.css");
-    </style>`
+`<template>
+  <div class="hello">
+    <div class="listtree"></div>
+  </div>
+</template>
+<script>
+</script>
+<style>
+@import url("./xxxxxxxx/iconfont.css");
+</style>`
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，iconfont不可省略)：
 
-    `import Listtree from 'v-listtree'
+`import Listtree from 'v-listtree'
 
-    Vue.use(Listtree, {
-      listData: require('../static/data.json'),
-      icon: ['iconfont xxxxxxxxxxxxx', 'iconfont yyyyyyyyyyyyyy']
-    })
-    Vue.prototype.$push = function (r) {
-      router.push(r)
-    }`
+Vue.use(Listtree, {
+  listData: require('../static/data.json'),
+  icon: ['iconfont xxxxxxxxxxxxx', 'iconfont yyyyyyyyyyyyyy']
+})
+Vue.prototype.$push = function (r) {
+  router.push(r)
+}`
 
 当然上面代码中icon你也可以替换成：icon: ['iconfont xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
-**2、使用Font Awesome图标库** 打开[Font Awesome网站](http://www.fontawesome.com.cn/)并下载最新版Font Awesome，将Font Awesome解压到mytree.vue同一个文件夹，mytree.vue 代码如下：
+**2、使用Font Awesome图标库** 打开<a href="http://www.fontawesome.com.cn/" target="_blank">Font Awesome网站</a>并下载最新版Font Awesome，将Font Awesome解压到mytree.vue同一个文件夹，mytree.vue 代码如下：
 
-    `<template>
-      <div class="hello">
-        <div class="listtree"></div>
-      </div>
-    </template>
-    <script>
-    </script>
-    <style>
-    @import url("./font-awesome-4.7.0/css/font-awesome.min.css");
-    </style>`
+`<template>
+  <div class="hello">
+    <div class="listtree"></div>
+  </div>
+</template>
+<script>
+</script>
+<style>
+@import url("./font-awesome-4.7.0/css/font-awesome.min.css");
+</style>`
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，fa不可省略)：
 
-    `import Listtree from 'v-listtree'
+`import Listtree from 'v-listtree'
 
-    Vue.use(Listtree, {
-      listData: require('../static/data.json'),
-      icon: ['fa xxxxxxxxxxxxx', 'fa yyyyyyyyyyyyyy']
-    })
-    Vue.prototype.$push = function (r) {
-      router.push(r)
-    }`
+Vue.use(Listtree, {
+  listData: require('../static/data.json'),
+  icon: ['fa xxxxxxxxxxxxx', 'fa yyyyyyyyyyyyyy']
+})
+Vue.prototype.$push = function (r) {
+  router.push(r)
+}`
 
 上面代码中icon也可以替换成：icon: ['fa xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
 **3、使用png、icon等格式图片作为图标** 建议将图片存放在static文件夹里，mytree.vue 代码如下：
 
-    `<template>
-      <div class="hello">
-        <div class="listtree"></div>
-      </div>
-    </template>
-    <script>
-    </script>
-    <style>
-    </style>`
+`<template>
+  <div class="hello">
+    <div class="listtree"></div>
+  </div>
+</template>
+<script>
+</script>
+<style>
+</style>`
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，fa不可省略)：
 
-    `import Listtree from 'v-listtree'
+`import Listtree from 'v-listtree'
 
-    Vue.use(Listtree, {
-      listData: require('../static/data.json'),
-      icon: ['../static/xxxxxxxxxxxxx', '../static/yyyyyyyyyyyyy']
-    })
-    Vue.prototype.$push = function (r) {
-      router.push(r)
-    }`
+Vue.use(Listtree, {
+  listData: require('../static/data.json'),
+  icon: ['../static/xxxxxxxxxxxxx', '../static/yyyyyyyyyyyyy']
+})
+Vue.prototype.$push = function (r) {
+  router.push(r)
+}`
 
 上面代码中icon也可以替换成：icon: ['../static/xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 ../static/xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
