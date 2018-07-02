@@ -220,7 +220,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 ### 3、不同级别菜单分支的 className
 
-不同级别菜单分支的 className 等于 "lt-branch_level_" 加上该菜单的级别，比如每个一级菜单都包含一个样式表："_lt-branch_level_1_"，每个二级菜单都包含一个样式表："_lt-branch_level_2_" …… ，以此类推。同理不同级别菜单分支对应的图标的 className 等于 "lt-branch-icon_level_" 加上该菜单的级别。
+不同级别菜单分支的 className 等于 "lt-branch_level_" 加上该菜单的级别，比如每个一级菜单都包含一个样式表："_lt-branch_level_1_"，每个二级菜单都包含一个样式表："_lt-branch_level_2_" …… ，以此类推。同理不同级别菜单分支对应的图标的 className 等于 "lt-branch-icon_level_" 加上该菜单的级别。如果一个菜单分支没有子级菜单，该类菜单还拥有样式："_lt-branch_level_0_"，该类菜单的图标拥有样式："_lt-branch-icon_level_0_"。
 
 ### 4、菜单分支被点击后的 className
 
