@@ -283,6 +283,11 @@ export default {
       if (theId.toString() === this.clickBranchIndex.toString()) { // ------判断是否为当前active状态branch，如果是就加上active状态的className
         iconClass += ' lt-branch-icon_active'
       }
+      /* 用被点击分支index减掉当前分支的index剩余部分包含一个"-"，即表示当前分支仅仅比被点击分支高一级（如果高一级以上，那么replace后剩余部分一定会包含多个"-"），为了消除特殊index带来的buger，在判断的时候clickBranchIndex和theId前都加了一个字母，并且最后得加一个判断："-"在第一个位置 */
+      let str = ('a' + this.clickBranchIndex.toString()).replace(('a' + index.toString()), '')
+      if ((str.split('-').length - 1 === 1) && str.indexOf('-') === 0) {
+        iconClass += ' lt-branch-icon_active_parent'
+      }
       return iconClass
     },
     branchAnimationStyle (id) { // ----animation的样式
