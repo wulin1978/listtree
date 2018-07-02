@@ -200,3 +200,32 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 ### 7、animation [Boolean true 可选]
 
 > animation 控制插件是否使用动画，默认值为true。当animation为true时，菜单展开闭合过程会有伸缩的一个动画，图标在菜单展开闭合过程中会有个旋转的动画（注：如果展开和闭合时不是同一个图标是不会产生旋转动画的）
+
+
+## v-listtree 样式命名规则
+
+> 在 v-listtree 插件中每一级菜单及其图标都有自己的样式表，如果你了解了这些样式表的命名规则，你就可以为不同级的菜单定义不同的样式，甚至可以为任何一个菜单分支定义不同的样式
+
+### 1、菜单分支的index
+
+1. 一级菜单index为自然数，从 1 开始分配，按照从上到下的顺序，每加一个一级分支index加1；
+2. 除一级菜单以外的菜单index为其父级菜单index加“-”再加一个自然数，该自然数也是从 1 开始分配，按照从上到下的顺序，每加一个分支该自然数加1（比如：2-1-3代表的是第二个一级分支下的第一个子分支下的第三个子分支）;
+3. 父级菜单不同的分支，其后面加的自然数互相不影响，也就是说每个菜单分配其子菜单的index时，其后面加的自然数都是从 1 开始。
+
+> 简单来说菜单分支的index就是类似于这样的： a-b-c-d-e，其中“a-b-c-d”为该分支父级分支的index
+
+### 2、菜单分支及其图标的 ID
+
+菜单分支的 ID 等于 "lt-branch_" 加上该分支的index，该菜单分支所对应的图标 ID 等于 "lt-branch-icon_" 加上该分支的index。
+
+### 3、不同级别菜单分支的 className
+
+不同级别菜单分支的 className 等于 "lt-branch_level_" 加上该菜单的级别，比如每个一级菜单都包含一个样式表："__lt-branch_level_1__"，每个二级菜单都包含一个样式表："__lt-branch_level_2__" …… ，以此类推。同理不同级别菜单分支对应的图标的 className 等于 "lt-branch-icon_level_" 加上该菜单的级别。
+
+### 4、菜单分支被点击后的 className
+
+某个菜单分支被点击后会增加一个样式表："__lt-branch_active__"，这个被点击的分支父级分支也会增加一个样式表："__lt-branch_active_parent__"，同时这个被点击的分支所有祖先分支都会增加active样式表，这些active样式表名目规则是：如果祖先分支是一级分支，增加的样式表名为："__lt-branch_level_1_active__"，如果祖先分支是二级分支，增加的样式表名为："__lt-branch_level_2_active__" …… ，以此类推。
+
+同理，某个菜单分支被点击后其对应的图标也会增加一个样式表："__lt-branch-icon_active__"，这个被点击的分支父级分支对应的图标增加一个样式表："__lt-branch-icon_active_parent__"，其祖先分支对应的图标增加的样式表为："__lt-branch_level_1_active__"、 "__lt-branch_level_2_active__"、 "__lt-branch_level_3_active__" …… 。
+
+__注意：只有包含 router 的菜单分支被点击时才会增加 active 样式（还记得 listdata 参数里的 router 属性吗）。__
