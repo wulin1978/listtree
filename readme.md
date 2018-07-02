@@ -68,39 +68,46 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 <table style="border:1px solid #222">
   <tr style="background:#ccc">
-    <td style="width:50px">open的值</td>
+    <td>open的值</td>
     <td>描述</td>
   </tr>
   <tr>
-    <td style="width:50px">0</td>
+    <td>0</td>
     <td>在初始状态下所有菜单均为闭合状态</td>
   </tr>
   <tr>
-    <td style="width:50px">1（默认值）</td>
-    <td>在初始状态下所有菜单均为展开状态</td>
+    <td>1</td>
+    <td>在初始状态下所有菜单均为展开状态，1 为 open 的默认值</td>
   </tr>
   <tr>
-    <td style="width:50px">2</td>
+    <td>2</td>
     <td>在初始状态下第一个一级菜单为展开状态，其他所有菜单均为闭合状态，且所有同级菜单在同一时间只能有一个分支展开</td>
   </tr>
   <tr>
-    <td style="width:50px">3</td>
+    <td>3</td>
     <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态</td>
   </tr>
   <tr>
-    <td style="width:50px">4</td>
+    <td>4</td>
     <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态，且一级菜单不能被闭合，一级菜单没有图标（但listdata中对应的一级菜单如果包含icon属性的话该一级菜单仍然有图标）</td>
   </tr>
 </table>
 
-### 3、indent
+### 3、indent [number 24 可选]
 
-> indent 是 number 数据类型的，它控制上下级菜单缩进距离，单位为 px。当 indent 为 0 时， 上下级菜单没有缩进，左边对齐。indent 默认值为 24。
+> indent 可控制上下级菜单缩进距离，单位为 px。默认值为24px，当 indent 为 0 时， 上下级菜单没有缩进，所有菜单分支左边对齐。
 
-### 4、spacing
+### 4、spacing [number 20 可选]
 
-> spacing 为 number 数据类型，它控制图标与菜单文字直接的间距。spacing 的默认值为 20。
+> spacing 控制图标与菜单文字之间的间距，单位为 px。的默认值为20px。
 
-### 5、icon
+### 5、icon [number/array 1 可选]
 
-> icon 控制图标样式，它可以是数字，也可以是数组。当 icon 为数字时，图标显示的是 v-listtree 提供的图标样式，目前提供 1 到 10 十种样式。当图标为数组时，可以从阿里巴巴图标库或Font Awesome图标库选择图标
+> icon 控制图标样式，它可以是数字，也可以是数组。当 icon 为数字时，图标显示的是 v-listtree 提供的图标样式，目前提供 1 到 10 十种样式。当图标为数组时，用户可以从阿里巴巴图标库或Font Awesome图标库选择图标，也可以使用png、icon等图片格式的图标。数组的第一个元素数据类型是字符串，指向菜单闭合时使用的图标。数组第二个元素可以是字符串也可以是number，当为字符串的时候它指向菜单展开时使用的图标，当为number时，表示菜单展开和闭合时使用同一个图标，但展开时图标顺时针旋转一个角度，这个角度的值即为数组第二个元素的值。
+
+>icon 为数字时比较简单也好理解，下面我们举例详细说明下 icon 为数组时的各种情况(这里我们假设你要使用 v-listtree 插件的组件是 mytree.vue)。
+
+>1、使用阿里巴巴图标库图标 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在进入你的项目，选择 Font class，点击下载至本地，将其放到mytree.vue同一个文件夹下，如下图：
+
+<img src="https://github.com/wulin1978/vuetest/blob/master/static/iconfont1.png?raw=true">
+
