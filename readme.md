@@ -16,7 +16,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
       listData: require('../static/listdata.json'),
     })
     Vue.prototype.$push = function (r) {
-      router.push(r)
+      parameter.push(r)
     }
 
 > 然后在需要插入菜单的组件插入下面代码：
@@ -27,11 +27,11 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 > 其中listdata.json是菜单的数据内容，下面讲参数时会具体说明。
 ## 参数
 
-> v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求，为了描述方便，这里假设你要插入本插件的组件为mytree.vue(建议你用空组件来引入本插件，然后在需要使用本本插件的地方直接import该组件)
+> v-listtree 一共有7个参数：listData、open、indent、spacing、icon、iconSize、animation，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求，为了描述方便，这里假设你要插入本插件的组件为mytree.vue(建议用空组件来引入本插件，然后在需要使用本本插件的地方直接import该组件)
 
-### 1、listdata [Array 必选]
+### 1、listData [Array 必选]
 
-> listdata 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单的路由地址（router），菜单的图标（icon）以及子级菜单（children）。类似于下面这段代码：
+> listData 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单对应的图标（icon），参数（parameter），以及子级菜单（children）。类似于下面这段代码：
 
     [
       {
@@ -39,7 +39,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
         "children": [
           {
             "name": "二级目录一",
-            "router": "/erji"
+            "parameter": "/erji"
           }
         ]
       },
@@ -49,17 +49,27 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
           {
             "name": "二级目录二",
             "icon": ["iconfont icon-yousanjiao", "iconfont icon-sanjiao3"]
-            "router": "/po"
+            "parameter": "/po"
           },
           {
             "name": "二级目录三",
-            "router": "/pl"
+            "parameter": "/pl"
           }
         ]
       }
     ]
 
-> 菜单分支四个属性：name,router,icon,children。name是菜单的文字内容，是必选的；router是菜单所指向的路由地址，可选；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说，可选；children好理解就是子分支，可选。下面截图是 v-listtree 的一个典型例子：
+> 菜单分支四个属性：
+
+__name__ [String 必选]，为菜单的文字内容；
+
+__parameter__ [String/Array/Object 可选]，当点击菜单时parameter会传递给外部组件，与菜单相关的一些数据（比如菜单分支对应的路由地址，在数据库中的id等）都可以放在parameter中，你可以在main.js文件中通过Vue.prototype.$listClick函数接收parameter数据并做一些相关的操作；
+
+__icon__ [Array 可选] 菜单分支前面的图标，这个后面介绍图标的时候会具体说明；
+
+__children__ [Array 可选] 菜单的子分支。
+
+下面截图是 v-listtree 的一个典型例子：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/lizi.png?raw=true">
 
@@ -89,7 +99,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
   </tr>
   <tr>
     <td>4</td>
-    <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态，且一级菜单不能被闭合，一级菜单没有图标（但listdata中对应的一级菜单如果包含icon属性的话该一级菜单仍然有图标）</td>
+    <td>在初始状态下所有一级菜单展开，其他菜单均为闭合状态，且一级菜单不能被闭合，一级菜单没有图标（但listData中对应的一级菜单如果包含icon属性的话该一级菜单仍然有图标）</td>
   </tr>
 </table>
 
@@ -132,8 +142,10 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
       listData: require('../static/data.json'),
       icon: ['iconfont xxxxxxxxxxxxx', 'iconfont yyyyyyyyyyyyyy']
     })
-    Vue.prototype.$push = function (r) {
-      router.push(r)
+    Vue.prototype.$push = function (parameter) {
+      if (parameter !== undefined) {
+        // 当点击菜单时你希望系统做的事情可以写在这里（比如路由跳转）
+      }
     }
 
 当然上面代码中icon你也可以替换成：icon: ['iconfont xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
@@ -160,7 +172,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
       icon: ['fa xxxxxxxxxxxxx', 'fa yyyyyyyyyyyyyy']
     })
     Vue.prototype.$push = function (r) {
-      router.push(r)
+      parameter.push(r)
     }
 
 上面代码中icon也可以替换成：icon: ['fa xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
@@ -186,7 +198,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
       icon: ['../static/xxxxxxxxxxxxx', '../static/yyyyyyyyyyyyy']
     })
     Vue.prototype.$push = function (r) {
-      router.push(r)
+      parameter.push(r)
     }
 
 上面代码中icon也可以替换成：icon: ['../static/xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 ../static/xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
@@ -228,4 +240,4 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 同理，某个菜单分支被点击后其对应的图标也会增加一个样式："_lt-branch-icon_active_"，这个被点击的分支父级分支对应的图标增加一个样式："_lt-branch-icon_active_parent_"，其祖先分支对应的图标增加的样式为："_lt-branch-icon_level_1_active_"、 "_lt-branch-icon_level_2_active_"、 "_lt-branch-icon_level_3_active_" …… 。
 
-__注意：只有包含 router 的菜单分支被点击时才会增加 active 样式（还记得 listdata 参数里的 router 属性吗）。__
+__注意：只有包含 parameter 的菜单分支被点击时才会增加 active 样式（还记得 listData 参数里的 parameter 属性吗）。__
