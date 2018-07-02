@@ -33,7 +33,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 > listdata 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单的路由地址（router），菜单的图标（icon）以及子级菜单（children）。类似于下面这段代码：
 
-    `[
+    [
       {
         "name": "一级目录一",
         "children": [
@@ -57,7 +57,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
           }
         ]
       }
-    ]`
+    ]
 
 > 菜单分支四个属性：name,router,icon,children。name是菜单的文字内容，是必选的；router是菜单所指向的路由地址，可选；icon是该菜单分支前面的图标，这个后面介绍图标的时候会具体说，可选；children好理解就是子分支，可选。下面截图是 v-listtree 的一个典型例子：
 
@@ -113,16 +113,16 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴图标库的css文件)：
 
-`<template>
-  <div class="hello">
-    <div class="listtree"></div>
-  </div>
-</template>
-<script>
-</script>
-<style>
-@import url("./xxxxxxxx/iconfont.css");
-</style>`
+    <template>
+      <div class="hello">
+        <div class="listtree"></div>
+      </div>
+    </template>
+    <script>
+    </script>
+    <style>
+    @import url("./xxxxxxxx/iconfont.css");
+    </style>
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，iconfont不可省略)：
 
@@ -140,16 +140,16 @@ Vue.prototype.$push = function (r) {
 
 **2、使用Font Awesome图标库** 打开<a href="http://www.fontawesome.com.cn/" target="_blank">Font Awesome网站</a>并下载最新版Font Awesome，将Font Awesome解压到mytree.vue同一个文件夹，mytree.vue 代码如下：
 
-`<template>
-  <div class="hello">
-    <div class="listtree"></div>
-  </div>
-</template>
-<script>
-</script>
-<style>
-@import url("./font-awesome-4.7.0/css/font-awesome.min.css");
-</style>`
+    <template>
+      <div class="hello">
+        <div class="listtree"></div>
+      </div>
+    </template>
+    <script>
+    </script>
+    <style>
+    @import url("./font-awesome-4.7.0/css/font-awesome.min.css");
+    </style>
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，fa不可省略)：
 
@@ -167,15 +167,15 @@ Vue.prototype.$push = function (r) {
 
 **3、使用png、icon等格式图片作为图标** 建议将图片存放在static文件夹里，mytree.vue 代码如下：
 
-`<template>
-  <div class="hello">
-    <div class="listtree"></div>
-  </div>
-</template>
-<script>
-</script>
-<style>
-</style>`
+    <template>
+      <div class="hello">
+        <div class="listtree"></div>
+      </div>
+    </template>
+    <script>
+    </script>
+    <style>
+    </style>
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，fa不可省略)：
 
