@@ -220,12 +220,12 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 ### 3、不同级别菜单分支的 className
 
-不同级别菜单分支的 className 等于 "lt-branch_level_" 加上该菜单的级别，比如每个一级菜单都包含一个样式表："__lt-branch_level_1__"，每个二级菜单都包含一个样式表："__lt-branch_level_2__" …… ，以此类推。同理不同级别菜单分支对应的图标的 className 等于 "lt-branch-icon_level_" 加上该菜单的级别。
+不同级别菜单分支的 className 等于 "lt-branch_level_" 加上该菜单的级别，比如每个一级菜单都包含一个样式表："_lt-branch_level_1_"，每个二级菜单都包含一个样式表："_lt-branch_level_2_" …… ，以此类推。同理不同级别菜单分支对应的图标的 className 等于 "lt-branch-icon_level_" 加上该菜单的级别。
 
 ### 4、菜单分支被点击后的 className
 
-某个菜单分支被点击后会增加一个样式表："__lt-branch_active__"，这个被点击的分支父级分支也会增加一个样式表："__lt-branch_active_parent__"，同时这个被点击的分支所有祖先分支都会增加active样式表，这些active样式表名目规则是：如果祖先分支是一级分支，增加的样式表名为："__lt-branch_level_1_active__"，如果祖先分支是二级分支，增加的样式表名为："__lt-branch_level_2_active__" …… ，以此类推。
+某个菜单分支被点击后会增加一个样式表："_lt-branch_active_"，这个被点击的分支父级分支也会增加一个样式表："_lt-branch_active_parent_"，同时这个被点击的分支所有祖先分支都会增加active样式表，这些active样式表名目规则是：如果祖先分支是一级分支，增加的样式表名为："_lt-branch_level_1_active_"，如果祖先分支是二级分支，增加的样式表名为："_lt-branch_level_2_active_" …… ，以此类推。
 
-同理，某个菜单分支被点击后其对应的图标也会增加一个样式表："__lt-branch-icon_active__"，这个被点击的分支父级分支对应的图标增加一个样式表："__lt-branch-icon_active_parent__"，其祖先分支对应的图标增加的样式表为："__lt-branch_level_1_active__"、 "__lt-branch_level_2_active__"、 "__lt-branch_level_3_active__" …… 。
+同理，某个菜单分支被点击后其对应的图标也会增加一个样式表："_lt-branch-icon_active_"，这个被点击的分支父级分支对应的图标增加一个样式表："_lt-branch-icon_active_parent_"，其祖先分支对应的图标增加的样式表为："_lt-branch_level_1_active_"、 "_lt-branch_level_2_active_"、 "_lt-branch_level_3_active_" …… 。
 
 __注意：只有包含 router 的菜单分支被点击时才会增加 active 样式（还记得 listdata 参数里的 router 属性吗）。__
