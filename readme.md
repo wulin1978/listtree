@@ -177,7 +177,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
     <style>
     </style>
 
-在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，fa不可省略)：
+在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标)：
 
     import Listtree from 'v-listtree'
 
