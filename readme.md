@@ -119,7 +119,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 >icon 为数字时比较简单也好理解，下面我们举例详细说明下 icon 为数组时的各种情况。
 
-**a 使用阿里巴巴图标库图标** 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在打开[阿里巴巴图标库](http://www.iconfont.cn){:target="_blank"}进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
+**a 使用阿里巴巴图标库图标** 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在打开阿里巴巴图标库<http://www.iconfont.cn>{:target="_blank"}进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/iconfont1.png?raw=true">
 
@@ -152,7 +152,7 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 当然上面代码中icon你也可以替换成：icon: ['iconfont xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
-**b 使用Font Awesome图标库** 打开[Font Awesome网站](http://www.fontawesome.com.cn){:target="_blank"}并下载最新版Font Awesome，将Font Awesome解压到mytree.vue同一个文件夹，mytree.vue 代码如下：
+**b 使用Font Awesome图标库** 打开[Font Awesome网站](http://www.fontawesome.com.cn:target=_blank)并下载最新版Font Awesome，将Font Awesome解压到mytree.vue同一个文件夹，mytree.vue 代码如下：
 
     <template>
       <div class="hello">
