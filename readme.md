@@ -126,15 +126,15 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，iconfont不可省略)：
 
-`import Listtree from 'v-listtree'
+    import Listtree from 'v-listtree'
 
-Vue.use(Listtree, {
-  listData: require('../static/data.json'),
-  icon: ['iconfont xxxxxxxxxxxxx', 'iconfont yyyyyyyyyyyyyy']
-})
-Vue.prototype.$push = function (r) {
-  router.push(r)
-}`
+    Vue.use(Listtree, {
+      listData: require('../static/data.json'),
+      icon: ['iconfont xxxxxxxxxxxxx', 'iconfont yyyyyyyyyyyyyy']
+    })
+    Vue.prototype.$push = function (r) {
+      router.push(r)
+    }
 
 当然上面代码中icon你也可以替换成：icon: ['iconfont xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
@@ -153,15 +153,15 @@ Vue.prototype.$push = function (r) {
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，fa不可省略)：
 
-`import Listtree from 'v-listtree'
+    import Listtree from 'v-listtree'
 
-Vue.use(Listtree, {
-  listData: require('../static/data.json'),
-  icon: ['fa xxxxxxxxxxxxx', 'fa yyyyyyyyyyyyyy']
-})
-Vue.prototype.$push = function (r) {
-  router.push(r)
-}`
+    Vue.use(Listtree, {
+      listData: require('../static/data.json'),
+      icon: ['fa xxxxxxxxxxxxx', 'fa yyyyyyyyyyyyyy']
+    })
+    Vue.prototype.$push = function (r) {
+      router.push(r)
+    }
 
 上面代码中icon也可以替换成：icon: ['fa xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
@@ -179,14 +179,14 @@ Vue.prototype.$push = function (r) {
 
 在 main.js 中插入下列代码(xxxxxxxxxxxxx 为闭合时的图标，yyyyyyyyyyyyyy 为展开时的图标，fa不可省略)：
 
-`import Listtree from 'v-listtree'
+    import Listtree from 'v-listtree'
 
-Vue.use(Listtree, {
-  listData: require('../static/data.json'),
-  icon: ['../static/xxxxxxxxxxxxx', '../static/yyyyyyyyyyyyy']
-})
-Vue.prototype.$push = function (r) {
-  router.push(r)
-}`
+    Vue.use(Listtree, {
+      listData: require('../static/data.json'),
+      icon: ['../static/xxxxxxxxxxxxx', '../static/yyyyyyyyyyyyy']
+    })
+    Vue.prototype.$push = function (r) {
+      router.push(r)
+    }
 
 上面代码中icon也可以替换成：icon: ['../static/xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 ../static/xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
