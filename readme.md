@@ -59,15 +59,15 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
       }
     ]
 
-> 菜单分支四个属性：
+菜单分支四个属性：
 
-__name__ [String 必选]，为菜单的文字内容；
+> __name__ [String 必选]，为菜单的文字内容；
 
-__parameter__ [String/Array/Object 可选]，当点击菜单时parameter会传递给外部组件，与菜单相关的一些数据（比如菜单分支对应的路由地址，在数据库中的id等）都可以放在parameter中，你可以在main.js文件中通过Vue.prototype.$listClick函数接收parameter数据并做一些相关的操作；
+> __parameter__ [String/Array/Object 可选]，当点击菜单时parameter会传递给外部组件，与菜单相关的一些数据（比如菜单分支对应的路由地址，在数据库中的id等）都可以放在parameter中，你可以在main.js文件中通过Vue.prototype.$listClick函数接收parameter数据并做一些相关的操作；
 
-__icon__ [Array 可选] 菜单分支前面的图标，这个后面介绍图标的时候会具体说明；
+> __icon__ [Array 可选] 菜单分支前面的图标，这个后面介绍图标的时候会具体说明；
 
-__children__ [Array 可选] 菜单的子分支。
+> __children__ [Array 可选] 菜单的子分支。
 
 下面截图是 v-listtree 的一个典型例子：
 
