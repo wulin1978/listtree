@@ -107,7 +107,33 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 
 >icon 为数字时比较简单也好理解，下面我们举例详细说明下 icon 为数组时的各种情况(这里我们假设你要使用 v-listtree 插件的组件是 mytree.vue)。
 
->1、使用阿里巴巴图标库图标 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在进入你的项目，选择 Font class，点击下载至本地，将其放到mytree.vue同一个文件夹下，如下图：
+1、使用阿里巴巴图标库图标 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/iconfont1.png?raw=true">
 
+mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴图标库的css文件)：
+
+    <template>
+      <div class="hello">
+        <div class="listtree"></div>
+      </div>
+    </template>
+    <script>
+    </script>
+    <style>
+    @import url("./xxxxxxxx/iconfont.css");
+    </style>
+
+在 main.js 中插入下列代码(icon-wenjianjiashouqi 为闭合时的图标，icon-wenjianjiazhankai 为展开时的图标，iconfont不可省略)：
+
+    import Listtree from 'v-listtree'
+
+    Vue.use(Listtree, {
+      listData: require('../static/data.json'),
+      icon: ['iconfont icon-wenjianjiashouqi', 'iconfont icon-wenjianjiazhankai']
+    })
+    Vue.prototype.$push = function (r) {
+      router.push(r)
+    }
+
+当然上面代码中icon你也可以替换成：icon: ['iconfont icon-wenjianjiashouqi', 90] ，此时表示菜单展开和闭合时图标都是 icon-wenjianjiashouqi，只是展开时图标顺时针旋转90度
