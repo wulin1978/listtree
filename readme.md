@@ -27,9 +27,9 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 > 其中listdata.json是菜单的数据内容，下面讲参数时会具体说明。
 ## 参数
 
-> v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求
+> v-listtree 一共有7个参数，通过配置这7个参数可以使 v-listtree 适应不同类型的菜单需求，为了描述方便，这里假设你要插入本插件的组件为mytree.vue(建议你用空组件来引入本插件，然后在需要使用本本插件的地方直接import该组件)
 
-### 1、listdata [数组 必选]
+### 1、listdata [Array 必选]
 
 > listdata 包含了所有菜单分支中的必要数据，包括：菜单的标题内容（name），菜单的路由地址（router），菜单的图标（icon）以及子级菜单（children）。类似于下面这段代码：
 
@@ -64,7 +64,7 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/lizi.png?raw=true">
 
 
-### 2、open [number 1 可选]
+### 2、open [Number 1 可选]
 
 <table style="border:1px solid #222">
   <tr style="background:#ccc">
@@ -93,25 +93,25 @@ v-listtree 是基于vue设计的无限级菜单插件，基本可以满足大部
   </tr>
 </table>
 
-### 3、indent [number 24 可选]
+### 3、indent [Number 24 可选]
 
 > indent 可控制上下级菜单缩进距离，单位为 px。默认值为24px，当 indent 为 0 时， 上下级菜单没有缩进，所有菜单分支左边对齐。
 
-### 4、spacing [number 20 可选]
+### 4、spacing [Number 20 可选]
 
 > spacing 控制图标与菜单文字之间的间距，单位为 px。的默认值为20px。
 
-### 5、icon [number/array 1 可选]
+### 5、icon [Number/Array 1 可选]
 
 > icon 控制图标样式，它可以是数字，也可以是数组。当 icon 为数字时，图标显示的是 v-listtree 提供的图标样式，目前提供 1 到 10 十种样式。当图标为数组时，用户可以从阿里巴巴图标库或Font Awesome图标库选择图标，也可以使用png、icon等图片格式的图标。数组的第一个元素数据类型是字符串，指向菜单闭合时使用的图标。数组第二个元素可以是字符串也可以是number，当为字符串的时候它指向菜单展开时使用的图标，当为number时，表示菜单展开和闭合时使用同一个图标，但展开时图标顺时针旋转一个角度，这个角度的值即为数组第二个元素的值。
 
->icon 为数字时比较简单也好理解，下面我们举例详细说明下 icon 为数组时的各种情况(这里我们假设你要使用 v-listtree 插件的组件是 mytree.vue)。
+>icon 为数字时比较简单也好理解，下面我们举例详细说明下 icon 为数组时的各种情况。
 
 **a 使用阿里巴巴图标库图标** 我们假设你已经在阿里巴巴图标库创建了自己的项目并已经添加或上传了自己的图标，现在打开<a href="http://www.iconfont.cn/" target="_blank">阿里巴巴图标库</a>进入你的项目，选择 Font class，点击下载至本地，将其解压放到mytree.vue同一个文件夹下，如下图：
 
 <img src="https://github.com/wulin1978/vuetest/blob/master/static/iconfont1.png?raw=true">
 
-mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴图标库的css文件)：
+mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴图标库中的css文件)：
 
     <template>
       <div class="hello">
@@ -192,3 +192,11 @@ mytree.vue 组件中的代码(xxxxxxxx/iconfont.css 即为下载的阿里巴巴�
 上面代码中icon也可以替换成：icon: ['../static/xxxxxxxxxxxxx', 90] ，此时表示菜单展开和闭合时图标都是 ../static/xxxxxxxxxxxxx，只是展开时图标顺时针旋转90度
 
 > 在icon里面设置的图标是单一的，也就是说所有的菜单分支图标都是一样的，如果你想要将某一个分支单独设置一个图标或者干脆让每个分支图标都不一样该怎么办呢，还记得前面提到过的 listtree 参数吗，listtree 元素里面有个icon属性，每个listtree 元素就代表一个菜单分支，设置某一分支的icon属性，该分支就拥有一个独立的图标。listtree 里面的icon数据类型是数组，同样该数组第一个元素代表的是菜单闭合时的图标，第二个元素如果是字符串代表的就是菜单展开时的图标，如果是数字代表的就是图标旋转的角度，此时菜单展开时的图标和闭合时的图标是一样的。listtree 元素里面有个icon属性和参数 icon 使用方法上都一样，它也可以使用阿里巴巴图标库、Font Awesome图标库和png、icon等格式图片作为图标。当然如果你不想在菜单里加任何的图标，可以将icon参数直接设为0就可以了。
+
+### 6、iconSize [Number 可选]
+
+> iconSize 控制图标的尺寸，单位为px，该参数没有默认值，如果你没有设置该值，则图标大小会被与之最近的fong-size控制，因为这里的图标本质上也是一种字体（用图片作为图标的除外），所以你也可以通过设置font-size的值来控制图标尺寸。但当图标为图片时，iconSize和font-size对图标无效。
+
+### 7、animation [Boolean true 可选]
+
+> animation 控制插件是否使用动画，默认值为true。当animation为true时，菜单展开闭合过程会有伸缩的一个动画，图标在菜单展开闭合过程中会有个旋转的动画（注：如果展开和闭合时不是同一个图标是不会产生旋转动画的）
